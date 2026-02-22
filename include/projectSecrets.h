@@ -7,5 +7,5 @@
 
 #endif //SSL_ANNE_MAIN_PROJECTSECRETS_H
 
-#define TESTSSID = "Paret"
-#define TESTPASS = "Insurance"
+#define TESTSSID "Paret"
+#define TESTPASS "Insurance"

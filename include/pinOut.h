@@ -1,0 +1,22 @@
+//
+// Created by HP Envy on 22/02/2026.
+//
+
+#ifndef SSL_ANNE_MAIN_PINOUT_H
+#define SSL_ANNE_MAIN_PINOUT_H
+
+#define PIN_MOTDR_L1_SPD 4
+#define PIN_MOTDR_L1_FOR 24
+#define PIN_MOTDR_L1_BAC 26
+#define PIN_MOTDR_L2_SPD 6
+#define PIN_MOTDR_L2_FOR 30
+#define PIN_MOTDR_L2_BAC 28
+
+#define PIN_MOTDR_R1_SPD 3
+#define PIN_MOTDR_R1_FOR 25
+#define PIN_MOTDR_R1_BAC 27
+#define PIN_MOTDR_R2_SPD 5
+#define PIN_MOTDR_R2_FOR 31
+#define PIN_MOTDR_R2_BAC 29
+
+#endif //SSL_ANNE_MAIN_PINOUT_H
