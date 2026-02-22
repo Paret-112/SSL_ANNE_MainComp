@@ -4,7 +4,19 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 
-#include <projectSecrets.h>
+int status = WL_IDLE_STATUS;
+
+char ssid[] = "Paret";        // your network SSID (name)
+char pass[] = "Insurance";    // your network password (use for WPA, or use as key for WEP)
+int keyIndex = 0;            // your network key index number (needed only for WEP)
+
+unsigned int localPort = 2390;      // local port to listen on
+
+char packetBuffer[256]; //buffer to hold incoming packet
+char  replyBuffer[] = "acknowledged";       // a string to send back
+char testPacket[256] = "motorTest";
+WiFiUDP Udp;
+
 
 // CHANGE BEFORE USING
 #define PIN_MOTDR_L1_SPD 4
@@ -21,25 +33,9 @@
 #define PIN_MOTDR_R2_FOR 31
 #define PIN_MOTDR_R2_BAC 29
 
-int status = WL_IDLE_STATUS;
-
-char ssid[] = TESTSSID;        // your network SSID (name)
-char pass[] = TESTPASS;    // your network password (use for WPA, or use as key for WEP)
-int keyIndex = 0;            // your network key index number (needed only for WEP)
-
-unsigned int localPort = 2390;      // local port to listen on
-
-char packetBuffer[256]; //buffer to hold incoming packet
-char  replyBuffer[] = "acknowledged";       // a string to send back
-char testPacket[256] = "motorTest";
-WiFiUDP Udp;
-
-void printWifiStatus();
 void wifiInitialization();
-void checkForPacket(int);
 void motorTest();
-
-
+void printWifiStatus();
 
 void setup() {
   // put your setup code here, to run once:
@@ -62,7 +58,31 @@ void setup() {
 
 void loop() {
   // if there's data available, read a packet
-  checkForPacket(Udp.parsePacket());
+  int packetSize = Udp.parsePacket();
+  if (packetSize) {
+    Serial.print("Received packet of size ");
+    Serial.println(packetSize);
+    Serial.print("From ");
+    IPAddress remoteIp = Udp.remoteIP();
+    Serial.print(remoteIp);
+    Serial.print(", port ");
+    Serial.println(Udp.remotePort());
+
+    // read the packet into packetBufffer
+    int len = Udp.read(packetBuffer, 255);
+    if (len > 0) {
+      packetBuffer[len] = 0;
+    }
+    Serial.println("Contents:");
+    Serial.println(packetBuffer);
+
+
+
+    // send a reply, to the IP address and port that sent us the packet we received
+    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
+    Udp.write(replyBuffer);
+    Udp.endPacket();
+  }
 
   if (packetBuffer[0] == testPacket[0]) {
     motorTest();
@@ -157,31 +177,3 @@ void wifiInitialization() {
 
 
 
-
-void checkForPacket(int packetSize) {
-  if (packetSize) {
-    Serial.print("Received packet of size ");
-    Serial.println(packetSize);
-    Serial.print("From ");
-    IPAddress remoteIp = Udp.remoteIP();
-    Serial.print(remoteIp);
-    Serial.print(", port ");
-    Serial.println(Udp.remotePort());
-
-    // read the packet into packetBufffer
-    int len = Udp.read(packetBuffer, 255);
-    if (len > 0) {
-      packetBuffer[len] = 0;
-    }
-    Serial.println("Contents:");
-    Serial.println(packetBuffer);
-
-
-
-
-    // send a reply, to the IP address and port that sent us the packet we received
-    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
-    Udp.write(replyBuffer);
-    Udp.endPacket();
-  }
-}
