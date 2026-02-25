@@ -61,6 +61,7 @@ void motorRun(int direction) {
         digitalWrite(PIN_MOTDR_R2_FOR, HIGH);
         digitalWrite(PIN_MOTDR_L1_FOR, HIGH);
         digitalWrite(PIN_MOTDR_L2_FOR, HIGH);
+        return;
     }
     if (direction == 1) { // RETREAT!!
         analogWrite(PIN_MOTDR_L1_SPD, 255);
@@ -72,6 +73,7 @@ void motorRun(int direction) {
         digitalWrite(PIN_MOTDR_R2_BAC, HIGH);
         digitalWrite(PIN_MOTDR_L1_BAC, HIGH);
         digitalWrite(PIN_MOTDR_L2_BAC, HIGH);
+        return;
     }
     if (direction == 2) { // FLANK RIGHT
         analogWrite(PIN_MOTDR_L1_SPD, 255);
@@ -79,6 +81,7 @@ void motorRun(int direction) {
 
         digitalWrite(PIN_MOTDR_R1_FOR, HIGH);
         digitalWrite(PIN_MOTDR_L2_FOR, HIGH);
+        return;
     }
     if (direction == 3) { // BACK RIGHT
         analogWrite(PIN_MOTDR_L2_SPD, 255);
@@ -86,6 +89,7 @@ void motorRun(int direction) {
 
         digitalWrite(PIN_MOTDR_R2_BAC, HIGH);
         digitalWrite(PIN_MOTDR_L1_BAC, HIGH);
+        return;
     }
     if (direction == 4) { // FLANK LEFT
         analogWrite(PIN_MOTDR_L2_SPD, 255);
@@ -93,8 +97,9 @@ void motorRun(int direction) {
 
         digitalWrite(PIN_MOTDR_R2_FOR, HIGH);
         digitalWrite(PIN_MOTDR_L1_FOR, HIGH);
+        return;
     }
-    if (direction == 1) { // BACK LEFT
+    if (direction == 5) { // BACK LEFT
         analogWrite(PIN_MOTDR_L1_SPD, 255);
         analogWrite(PIN_MOTDR_R2_SPD, 255);
 
