@@ -21,7 +21,6 @@ unsigned int listeningPort = 2390;      // local port to listen on
 char packetBuffer[256]; //buffer to hold incoming packet
 char  replyBuffer[] = "acknowledged";       // a string to send back
 char testPacket[256] = "motorTest";
-WiFiUDP Udp;
 
 
 // CHANGE BEFORE USING
@@ -47,7 +46,7 @@ void setup() {
 
 void loop() {
   // if there's data available, read a packet
-  checkPackets(Udp.parsePacket(), packetBuffer, replyBuffer);
+  checkPackets(packetBuffer, replyBuffer);
 
   if (packetBuffer[0] == testPacket[0]) {
     motorTest();

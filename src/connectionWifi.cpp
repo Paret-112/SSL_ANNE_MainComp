@@ -59,7 +59,8 @@ void wifiInitialization(unsigned int localPort, int status, char ssid[], char pa
     Udp.begin(localPort);
 }
 
-void checkPackets(int packetSize, char packetBuffer[], char replyBuffer[]) {
+void checkPackets(char packetBuffer[], char replyBuffer[]) {
+    int packetSize = Udp.parsePacket();
     if (packetSize) {
         Serial.print("Received packet of size ");
         Serial.println(packetSize);
