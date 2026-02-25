@@ -57,6 +57,7 @@ void wifiInitialization(unsigned int localPort, int status, char ssid[], char pa
     Serial.println("\nStarting connection to server...");
     // if you get a connection, report back via serial:
     Udp.begin(localPort);
+    Serial.println("\nWeee!");
 }
 
 void checkPackets(char packetBuffer[], char replyBuffer[]) {

@@ -46,7 +46,7 @@ void setup() {
 
 void loop() {
   unsigned long currentTime = millis();
-  Serial.println(currentTime);
+  
   // if there's data available, read a packet
   checkPackets(packetBuffer, replyBuffer);
 
