@@ -22,6 +22,7 @@ char packetBuffer[256]; //buffer to hold incoming packet
 char  replyBuffer[] = "acknowledged";       // a string to send back
 char testPacket[256] = "motorTest";
 
+unsigned long previousTime = millis();
 
 // CHANGE BEFORE USING
 
@@ -46,13 +47,12 @@ void setup() {
 
 void loop() {
   unsigned long currentTime = millis();
-  
   // if there's data available, read a packet
-  checkPackets(packetBuffer, replyBuffer);
-
-  if (packetBuffer[0] == testPacket[0]) {
-    Serial.println(currentTime);
+  if (checkPackets(packetBuffer, replyBuffer)) {
+    Serial.println(String(packetBuffer) + " at system time: " + currentTime);
   }
+
+
 
 
 
