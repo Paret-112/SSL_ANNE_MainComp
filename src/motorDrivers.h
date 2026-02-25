@@ -6,5 +6,7 @@
 #define SSL_ANNE_MAIN_MOTORDRIVERS_H
 
 void motorTest();
+void motorStop();
+void motorRun(int);
 
 #endif //SSL_ANNE_MAIN_MOTORDRIVERS_H
