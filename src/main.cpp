@@ -45,13 +45,16 @@ void setup() {
 }
 
 void loop() {
+  unsigned long currentTime = millis();
+  Serial.println(currentTime);
   // if there's data available, read a packet
   checkPackets(packetBuffer, replyBuffer);
 
   if (packetBuffer[0] == testPacket[0]) {
-    motorTest();
-    Serial.println("Initialized Motor Test");
+    Serial.println(currentTime);
   }
+
+
 
   // Set motor speed factor
   analogWrite(PIN_MOTDR_L1_SPD, 128);
