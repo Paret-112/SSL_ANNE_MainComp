@@ -68,7 +68,7 @@ void loop() {
   // if there's data available, read a packet
 
 
-  // Set motor speed factor
+  // Set motor speed factor.
   analogWrite(PIN_MOTDR_L1_SPD, 128);
   analogWrite(PIN_MOTDR_L2_SPD, 128);
   analogWrite(PIN_MOTDR_R1_SPD, 128);
