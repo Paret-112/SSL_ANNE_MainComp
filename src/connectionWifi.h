@@ -16,7 +16,7 @@ struct packedInstructions {
 
 void printWifiStatus();
 void wifiInitialization(unsigned int, int, char[], char[]);
-bool checkPackets(char[], char[]);
+void checkPackets(char[], char[], unsigned long);
 packedInstructions repackageInstructions(char[]);
 
 #endif //SSL_ANNE_MAIN_CONNECTIONWIFI_H

@@ -1,14 +1,13 @@
 #include <Arduino.h>
 
-#include <SPI.h>
 #include <WiFi.h>
-#include <WiFiUdp.h>
+#include <TaskManagerIO.h>
 
 #include "pinOut.h" // Check and change before use!
+#include "projectSecrets.h" // Shh, secrets live here, make a new one or replace secrets in code for local tests
 
 #include "connectionWifi.h" // Wifi connection module
 #include "motorDrivers.h" // Motor drivers and tests
-#include "projectSecrets.h" // Shh, secrets live here, make a new one or replace secrets in code for local tests
 
 int status = WL_IDLE_STATUS;
 
@@ -21,10 +20,11 @@ unsigned int listeningPort = 2390;      // local port to listen on
 char packetBuffer[256]; //buffer to hold incoming packet
 char  replyBuffer[] = "acknowledged";       // a string to send back
 char testPacket[256] = "motorTest";
+char emptyBuffer[256];
 
 unsigned long previousTime = millis();
+unsigned long currentTime = millis();
 
-// CHANGE BEFORE USING
 
 void setup() {
   // put your setup code here, to run once:
@@ -43,19 +43,30 @@ void setup() {
   pinMode(PIN_MOTDR_R2_BAC, OUTPUT);
 
   wifiInitialization(listeningPort, status, ssid, pass);
+
+  // Create a task that's scheduled every second
+  taskManager.schedule(repeatSeconds(1), [] {
+    checkPackets(packetBuffer, replyBuffer, currentTime);
+    if (packetBuffer[0] == testPacket[0]) {
+    Serial.print(packetBuffer);
+    Serial.print(" at system time: ");
+    Serial.println(currentTime);
+    packedInstructions currentInstructions = repackageInstructions(packetBuffer);
+    motorRun(currentInstructions.direction);
+    packetBuffer[0] = '\0';
+  }
+  });
+
+  taskManager.schedule(repeatSeconds(1), [] {
+
+  });
+
 }
 
 void loop() {
-  unsigned long currentTime = millis();
+  currentTime = millis();
+  taskManager.runLoop();
   // if there's data available, read a packet
-  if (checkPackets(packetBuffer, replyBuffer)) {
-    Serial.println(String(packetBuffer) + " at system time: " + currentTime);
-    packedInstructions currentInstructions = repackageInstructions(packetBuffer);
-    motorRun(currentInstructions.direction);
-  }
-
-
-
 
 
   // Set motor speed factor
