@@ -8,5 +8,6 @@
 void motorTest();
 void motorStop();
 void motorRun(int);
+void motorTurn(int);
 
 #endif //SSL_ANNE_MAIN_MOTORDRIVERS_H
