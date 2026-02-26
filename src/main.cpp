@@ -20,7 +20,6 @@ unsigned int listeningPort = 2390;      // local port to listen on
 char packetBuffer[256]; //buffer to hold incoming packet
 char  replyBuffer[] = "acknowledged";       // a string to send back
 char testPacket[256] = "motorTest";
-char emptyBuffer[256];
 
 unsigned long previousTime = millis();
 unsigned long currentTime = millis();
