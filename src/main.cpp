@@ -24,6 +24,8 @@ char testPacket[256] = "motorTest";
 unsigned long previousTime = millis();
 unsigned long currentTime = millis();
 
+packedInstructions currentInstructions;
+void callInstructions(packedInstructions, taskid_t);
 
 void setup() {
   // put your setup code here, to run once:
@@ -42,24 +44,23 @@ void setup() {
   pinMode(PIN_MOTDR_R2_BAC, OUTPUT);
 
   wifiInitialization(listeningPort, status, ssid, pass);
+  taskid_t motorTask = taskManager.schedule(repeatSeconds(1), [motorTask] {
+    motorRun(currentInstructions.direction);
+    taskManager.setTaskEnabled(motorTask, false);
+  });
 
   // Create a task that's scheduled every second
-  taskManager.schedule(repeatSeconds(1), [] {
+  taskManager.schedule(repeatSeconds(1), [motorTask] {
     checkPackets(packetBuffer, replyBuffer, currentTime);
     if (packetBuffer[0] == testPacket[0]) {
     Serial.print(packetBuffer);
     Serial.print(" at system time: ");
     Serial.println(currentTime);
-    packedInstructions currentInstructions = repackageInstructions(packetBuffer);
-    motorRun(currentInstructions.direction);
+    currentInstructions = repackageInstructions(packetBuffer);
+    taskManager.scheduleOnce(2, [motorTask] {callInstructions(currentInstructions, motorTask);});
     packetBuffer[0] = '\0';
   }
   });
-
-  taskManager.schedule(repeatSeconds(1), [] {
-
-  });
-
 }
 
 void loop() {
@@ -75,5 +76,19 @@ void loop() {
   analogWrite(PIN_MOTDR_R2_SPD, 128);
 }
 
+void callInstructions(packedInstructions instructions, taskid_t motorTask) {
+  if (instructions.turnToQ == true) {
+    int turnRate = 1;
+    taskManager.scheduleOnce(10, [instructions] {motorTurn(instructions.direction);});
+    taskManager.scheduleOnce(10 + instructions.direction / turnRate, [] {motorStop();});
+  }
 
+  if (instructions.distance) {
+    int speed = 1;
+    taskManager.scheduleOnce(20, [instructions] {motorRun(instructions.direction);});
+    taskManager.setTaskEnabled(motorTask, true);
+    taskManager.scheduleOnce(20 + instructions.distance / speed, [] {motorStop();});
+  }
+
+}
 
