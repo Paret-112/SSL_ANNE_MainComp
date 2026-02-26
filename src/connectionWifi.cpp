@@ -3,6 +3,7 @@
 //
 
 #include "connectionWifi.h"
+#include "pinOut.h"
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -29,11 +30,7 @@ void printWifiStatus() {
 
 void wifiInitialization(unsigned int localPort, int status, char ssid[], char pass[]) {
     //Initialize serial and wait for port to open:
-    Serial.begin(9600);
-    while (!Serial) {
-        ; // wait for serial port to connect. Needed for native USB port only
-    }
-
+    Serial.begin(SERIAL_BAUD);
     // check for the Wi-Fi module:
     if (WiFi.status() == WL_NO_MODULE) {
         Serial.println("Communication with WiFi module failed!");
@@ -60,7 +57,7 @@ void wifiInitialization(unsigned int localPort, int status, char ssid[], char pa
     Serial.println("\nWeee!");
 }
 
-bool checkPackets(char packetBuffer[], char replyBuffer[]) {
+void checkPackets(char packetBuffer[], char replyBuffer[], unsigned long systemTime) {
     int packetSize = Udp.parsePacket();
     if (packetSize) {
         Serial.print("Received packet of size ");
@@ -76,7 +73,7 @@ bool checkPackets(char packetBuffer[], char replyBuffer[]) {
         if (len > 0) {
             packetBuffer[len] = 0;
         }
-        Serial.println("Contents:");
+        Serial.print("Contents: ");
         Serial.println(packetBuffer);
 
 
@@ -85,7 +82,19 @@ bool checkPackets(char packetBuffer[], char replyBuffer[]) {
         Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
         Udp.write(replyBuffer);
         Udp.endPacket();
-        return true;
+    } else {
+        Serial.print("No packets received at System time: ");
+        Serial.println(systemTime);
     }
-    return false;
+}
+
+packedInstructions repackageInstructions(char newInstructions[256]) { // TEMPORARY PACKAGE STRUCTURE
+    packedInstructions received;
+    received.direction = newInstructions[1];
+    received.turnToQ = newInstructions[2];
+    received.distance = newInstructions[3];
+    received.collectorOnQ = newInstructions[4];
+    received.gameState = newInstructions[5];
+    received.shootKickerAtEnd = newInstructions[6];
+    return received;
 }

@@ -19,4 +19,6 @@
 #define PIN_MOTDR_R2_FOR 31
 #define PIN_MOTDR_R2_BAC 29
 
+#define SERIAL_BAUD 115200
+
 #endif //SSL_ANNE_MAIN_PINOUT_H
