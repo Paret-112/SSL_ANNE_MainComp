@@ -89,3 +89,14 @@ bool checkPackets(char packetBuffer[], char replyBuffer[]) {
     }
     return false;
 }
+
+packedInstructions repackageInstructions(char newInstructions[256]) { // TEMPORARY PACKAGE STRUCTURE
+    packedInstructions received;
+    received.direction = newInstructions[0];
+    received.turnToQ = newInstructions[1];
+    received.distance = newInstructions[2];
+    received.collectorOnQ = newInstructions[3];
+    received.gameState = newInstructions[4];
+    received.shootKickerAtEnd = newInstructions[5];
+    return received;
+}

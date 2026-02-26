@@ -50,6 +50,8 @@ void loop() {
   // if there's data available, read a packet
   if (checkPackets(packetBuffer, replyBuffer)) {
     Serial.println(String(packetBuffer) + " at system time: " + currentTime);
+    packedInstructions currentInstructions = repackageInstructions(packetBuffer);
+    motorRun(currentInstructions.direction);
   }
 
 
