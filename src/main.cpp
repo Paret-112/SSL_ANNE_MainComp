@@ -41,6 +41,14 @@ void setup() {
   pinMode(PIN_MOTDR_R2_FOR, OUTPUT);
   pinMode(PIN_MOTDR_R2_BAC, OUTPUT);
 
+  pinMode(PIN_MOTPUMP_SPD, OUTPUT);
+  pinMode(PIN_MOTPUMP_IN, OUTPUT);
+  pinMode(PIN_MOTPUMP_OUT, OUTPUT);
+
+  pinMode(PIN_MOTKICK_SPD, OUTPUT);
+  pinMode(PIN_MOTKICK_FOR, OUTPUT);
+  pinMode(PIN_MOTKICK_BAC, OUTPUT);
+
   wifiInitialization(listeningPort, status, ssid, pass);
 
   // Create a task that's scheduled every second
