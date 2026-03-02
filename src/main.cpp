@@ -65,7 +65,8 @@ void setup() {
   });
 
   taskManager.schedule(repeatSeconds(1), [] {
-
+    digitalWrite(PIN_MOTPUMP_OUT, HIGH);
+    analogWrite(PIN_MOTPUMP_SPD, 500);
   });
 
 }
