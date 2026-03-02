@@ -4,7 +4,7 @@
 #include <TaskManagerIO.h>
 
 #include "pinOut.h" // Check and change before use!
-#include "projectSecrets.h" // Shh, secrets live here, make a new one or replace secrets in code for local tests
+#include "projectSettings.h" // Shh, secrets live here, make a new one or replace secrets in code for local tests
 
 #include "connectionWifi.h" // Wifi connection module
 #include "motorDrivers.h" // Motor drivers and tests
@@ -15,7 +15,7 @@ char ssid[] = TESTSSID;        // your network SSID (name)
 char pass[] = TESTPASS;    // your network password (use for WPA, or use as key for WEP)
 int keyIndex = 0;            // your network key index number (needed only for WEP)
 
-unsigned int listeningPort = 2390;      // local port to listen on
+const unsigned int listeningPort = LOCALPORT;      // local port to listen on
 
 u_int8_t packetBuffer[256]; //buffer to hold incoming packet
 char  replyBuffer[] = "acknowledged";       // a string to send back
@@ -44,7 +44,7 @@ void setup() {
   wifiInitialization(listeningPort, status, ssid, pass);
 
   // Create a task that's scheduled every second
-  taskManager.schedule(repeatSeconds(1), [] {
+  taskManager.schedule(repeatMillis(100), [] {
     checkPackets(packetBuffer, currentTime);
   });
   taskManager.schedule(repeatSeconds(1), [] {

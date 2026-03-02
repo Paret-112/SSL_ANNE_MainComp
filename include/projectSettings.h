@@ -9,5 +9,8 @@
 
 #define TESTSSID "Paret"
 #define TESTPASS "Insurance"
+#define LOCALPORT 1234
 
 #define ROBOTID 3
+
+#define SERIAL_BAUD 115200

@@ -9,7 +9,7 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 
-#include "projectSecrets.h"
+#include "projectSettings.h"
 
 WiFiUDP Udp;
 
@@ -30,7 +30,7 @@ void printWifiStatus() {
     Serial.println(" dBm");
 }
 
-void wifiInitialization(unsigned int localPort, int status, char ssid[], char pass[]) {
+void wifiInitialization(const unsigned int localPort, int status, char ssid[], char pass[]) {
     //Initialize serial and wait for port to open:
     Serial.begin(SERIAL_BAUD);
     // check for the Wi-Fi module:
@@ -61,12 +61,14 @@ void wifiInitialization(unsigned int localPort, int status, char ssid[], char pa
 
 void checkPackets(uint8_t packetBuffer[], unsigned long systemTime) {
     int packetSize = Udp.parsePacket();
+    // Serial.print("Checked for packet at: ");
+    // Serial.println(systemTime);
     if (!packetSize) return;
 
     Serial.print("Received packet of size ");
     Serial.print(packetSize);
     Serial.print(" at system time: ");
-    Serial.print(systemTime);
+    Serial.println(systemTime);
     Serial.print("From ");
     IPAddress remoteIp = Udp.remoteIP();
     Serial.print(remoteIp);
