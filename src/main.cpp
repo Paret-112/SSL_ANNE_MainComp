@@ -17,7 +17,7 @@ int keyIndex = 0;            // your network key index number (needed only for W
 
 unsigned int listeningPort = 2390;      // local port to listen on
 
-char packetBuffer[256]; //buffer to hold incoming packet
+u_int8_t packetBuffer[256]; //buffer to hold incoming packet
 char  replyBuffer[] = "acknowledged";       // a string to send back
 char testPacket[256] = "motorTest";
 
@@ -45,17 +45,8 @@ void setup() {
 
   // Create a task that's scheduled every second
   taskManager.schedule(repeatSeconds(1), [] {
-    checkPackets(packetBuffer, replyBuffer, currentTime);
-    if (packetBuffer[0] == testPacket[0]) {
-    Serial.print(packetBuffer);
-    Serial.print(" at system time: ");
-    Serial.println(currentTime);
-    packedInstructions currentInstructions = repackageInstructions(packetBuffer);
-    motorRun(currentInstructions.direction);
-    packetBuffer[0] = '\0';
-  }
+    checkPackets(packetBuffer, currentTime);
   });
-
   taskManager.schedule(repeatSeconds(1), [] {
 
   });

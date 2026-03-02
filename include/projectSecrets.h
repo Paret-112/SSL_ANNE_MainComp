@@ -9,3 +9,5 @@
 
 #define TESTSSID "Paret"
 #define TESTPASS "Insurance"
+
+#define ROBOTID 3

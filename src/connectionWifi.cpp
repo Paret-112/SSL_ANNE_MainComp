@@ -9,6 +9,8 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 
+#include "projectSecrets.h"
+
 WiFiUDP Udp;
 
 void printWifiStatus() {
@@ -57,44 +59,63 @@ void wifiInitialization(unsigned int localPort, int status, char ssid[], char pa
     Serial.println("\nWeee!");
 }
 
-void checkPackets(char packetBuffer[], char replyBuffer[], unsigned long systemTime) {
+void checkPackets(uint8_t packetBuffer[], unsigned long systemTime) {
     int packetSize = Udp.parsePacket();
-    if (packetSize) {
-        Serial.print("Received packet of size ");
-        Serial.println(packetSize);
-        Serial.print("From ");
-        IPAddress remoteIp = Udp.remoteIP();
-        Serial.print(remoteIp);
-        Serial.print(", port ");
-        Serial.println(Udp.remotePort());
+    if (!packetSize) return;
 
-        // read the packet into packetBufffer
-        int len = Udp.read(packetBuffer, 255);
-        if (len > 0) {
-            packetBuffer[len] = 0;
-        }
-        Serial.print("Contents: ");
-        Serial.println(packetBuffer);
+    Serial.print("Received packet of size ");
+    Serial.print(packetSize);
+    Serial.print(" at system time: ");
+    Serial.print(systemTime);
+    Serial.print("From ");
+    IPAddress remoteIp = Udp.remoteIP();
+    Serial.print(remoteIp);
+    Serial.print(", port ");
+    Serial.println(Udp.remotePort());
 
 
+    // read the packet into packetBufffer
+    Udp.read(packetBuffer, packetSize);
 
-        // send a reply, to the IP address and port that sent us the packet we received
+    uint8_t msg_type = packetBuffer[0];
+
+    if (msg_type == MSG_DISCOVER) {
+
+        uint8_t reply[2];
+        reply[0] = MSG_DISCOVER_REPLY;
+        reply[1] = ROBOTID;
+
         Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
-        Udp.write(replyBuffer);
+        Udp.write(reply, 2);
         Udp.endPacket();
-    } else {
-        Serial.print("No packets received at System time: ");
-        Serial.println(systemTime);
-    }
-}
 
-packedInstructions repackageInstructions(char newInstructions[256]) { // TEMPORARY PACKAGE STRUCTURE
-    packedInstructions received;
-    received.direction = newInstructions[1];
-    received.turnToQ = newInstructions[2];
-    received.distance = newInstructions[3];
-    received.collectorOnQ = newInstructions[4];
-    received.gameState = newInstructions[5];
-    received.shootKickerAtEnd = newInstructions[6];
-    return received;
+        Serial.println("Discovery 'n tie reply sent");
+    }
+
+    if (msg_type == MSG_COMMAND) {
+
+        if (packetSize < sizeof(CommandPacket)) return;
+
+        CommandPacket packet;
+        memcpy(&packet, packetBuffer, sizeof(packet));
+
+        if (packet.robot_id != ROBOTID) return;
+
+        Serial.println("----New Command----");
+        Serial.println(packet.angle1);
+        Serial.println(packet.distance);
+        Serial.println(packet.angle2);
+        Serial.println(packet.collectorOnQ);
+        Serial.println(packet.shootKickerAtEnd);
+        Serial.println(packet.gameState);
+        Serial.println("-------------------");
+
+        uint8_t reply[2];
+        reply[0] = 1;
+        reply[1] = ROBOTID;
+
+        Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
+        Udp.write(reply, 2);
+        Udp.endPacket();
+    }
 }
