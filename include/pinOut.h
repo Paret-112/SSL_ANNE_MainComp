@@ -21,6 +21,8 @@
 #define PIN_MOTDR_L1_SPD 4
 #define PIN_MOTDR_L2_SPD 5
 
+#define PIN_MOTPUMP_IN 46
+#define PIN_MOTPUMP_OUT 47
 #define PIN_MOTKICK_FOR 44
 #define PIN_MOTKICK_BAC 45
 #define PIN_MOTPUMP_IN 46
