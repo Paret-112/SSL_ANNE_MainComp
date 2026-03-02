@@ -29,6 +29,4 @@
 #define PIN_MOTKICK_SPD 6
 #define PIN_MOTPUMP_SPD 7
 
-#define SERIAL_BAUD 115200
-
 #endif //SSL_ANNE_MAIN_PINOUT_H
