@@ -17,8 +17,8 @@ struct __attribute__((packed)) CommandPacket {
     int angle1;
     int distance;
     int angle2;
-    bool collectorOnQ;
-    bool shootKickerAtEnd;
+    int collectorOnQ;
+    int shootKickerAtEnd;
     int gameState;
 };
 
