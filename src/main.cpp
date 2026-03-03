@@ -7,7 +7,7 @@
 #include "projectSettings.h" // Shh, secrets live here, make a new one or replace secrets in code for local tests
 
 #include "connectionWifi.h" // Wifi connection module
-#include "motorDrivers.h" // Motor drivers and tests
+#include "actuationTasks.h" // Motor tasks
 
 int status = WL_IDLE_STATUS;
 
@@ -54,12 +54,14 @@ void setup() {
   // Create a task that's scheduled every second
   taskManager.schedule(repeatMillis(100), [] {
     checkPackets(packetBuffer, currentTime);
+    CommandPacket packet;
+    memcpy(&packet, packetBuffer, sizeof(packet));
+    if (packet.robot_id == ROBOTID) {
+      motorTurnTask(packet.angle1, 1, TURN_SPEED);
+      motorRunTask(packet.distance, 255, ACTUAL_SPEED);
+      motorTurnTask(packet.angle2, 0, TURN_SPEED);
+    }
   });
-  taskManager.schedule(repeatSeconds(1), [] {
-    digitalWrite(PIN_MOTPUMP_OUT, HIGH);
-    analogWrite(PIN_MOTPUMP_SPD, 500);
-  });
-
 }
 
 void loop() {
