@@ -15,5 +15,5 @@
 
 #define SERIAL_BAUD 115200
 
-#define TURN_SPEED 100
-#define ACTUAL_SPEED 100
+#define TURN_SPEED 1000
+#define ACTUAL_SPEED 1000

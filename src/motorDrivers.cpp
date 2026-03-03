@@ -102,21 +102,32 @@ void motorTurn(int degrees) {
 }
 
 void motorKick() {
-
+    digitalWrite(PIN_MOTKICK_FOR, HIGH);
+    analogWrite(PIN_MOTKICK_SPD, 255);
+    digitalWrite(PIN_MOTKICK_BAC, HIGH);
 }
 
 void motorKickPrepare() {
+    analogWrite(PIN_MOTKICK_SPD, 255);
+    digitalWrite(PIN_MOTKICK_FOR, HIGH);
+    digitalWrite(PIN_MOTKICK_BAC, LOW);
 
 }
 
 void pumpActuateIn() {
-
+    digitalWrite(PIN_MOTPUMP_IN, HIGH);
+    analogWrite(PIN_MOTPUMP_SPD, 255);
+    digitalWrite(PIN_MOTPUMP_OUT, LOW);
 }
 
 void pumpActuateOut() {
-
+    digitalWrite(PIN_MOTPUMP_OUT, HIGH);
+    analogWrite(PIN_MOTPUMP_SPD, 255);
+    digitalWrite(PIN_MOTPUMP_IN, LOW);
 }
 
 void pumpActuateStop() {
-
+    digitalWrite(PIN_MOTPUMP_OUT, LOW);
+    digitalWrite(PIN_MOTPUMP_IN, LOW);
+    analogWrite(PIN_MOTPUMP_SPD, 0);
 }

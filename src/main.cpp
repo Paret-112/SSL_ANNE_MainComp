@@ -15,6 +15,8 @@ char ssid[] = TESTSSID;        // your network SSID (name)
 char pass[] = TESTPASS;    // your network password (use for WPA, or use as key for WEP)
 int keyIndex = 0;            // your network key index number (needed only for WEP)
 
+int lastPacketID = 0;
+
 const unsigned int listeningPort = LOCALPORT;      // local port to listen on
 
 u_int8_t packetBuffer[256]; //buffer to hold incoming packet
@@ -52,14 +54,35 @@ void setup() {
   wifiInitialization(listeningPort, status, ssid, pass);
 
   // Create a task that's scheduled every second
-  taskManager.schedule(repeatMillis(100), [] {
-    checkPackets(packetBuffer, currentTime);
+  taskManager.schedule(repeatMillis(1500), [] {
+    checkPackets(packetBuffer, currentTime, lastPacketID);
     CommandPacket packet;
     memcpy(&packet, packetBuffer, sizeof(packet));
     if (packet.robot_id == ROBOTID) {
+      if (packet.packetID == lastPacketID) return;
+      taskManager.reset();
       motorTurnTask(packet.angle1, 1, TURN_SPEED);
       motorRunTask(packet.distance, 255, ACTUAL_SPEED);
       motorTurnTask(packet.angle2, 0, TURN_SPEED);
+      Serial.println("----New Command----");
+      Serial.println(packet.angle1);
+      Serial.println(packet.distance);
+      Serial.println(packet.angle2);
+      Serial.println(packet.collectorOnQ);
+      Serial.println(packet.shootKickerAtEnd);
+      Serial.println(packet.gameState);
+      Serial.println("-------------------");
+      packet.reset();
+      packetBuffer[0] = 0;
+      Serial.println("----New Command----");
+      Serial.println(packet.angle1);
+      Serial.println(packet.distance);
+      Serial.println(packet.angle2);
+      Serial.println(packet.collectorOnQ);
+      Serial.println(packet.shootKickerAtEnd);
+      Serial.println(packet.gameState);
+      Serial.println("-------------------");
+
     }
   });
 }
