@@ -7,7 +7,7 @@
 
 #include "actuationTasks.h"
 
-void motorRunTasks(int distance, int speed, int actualSpeed) {
+void motorRunTask(int distance, int speed, int actualSpeed) {
     taskManager.scheduleOnce(50, [speed] {
         motorRun(0, speed);
     });
