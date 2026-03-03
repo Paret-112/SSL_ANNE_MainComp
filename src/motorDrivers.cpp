@@ -100,3 +100,23 @@ void motorTurn(int degrees) {
         digitalWrite(PIN_MOTDR_R2_FOR, HIGH);
     }
 }
+
+void motorKick() {
+
+}
+
+void motorKickPrepare() {
+
+}
+
+void pumpActuateIn() {
+
+}
+
+void pumpActuateOut() {
+
+}
+
+void pumpActuateStop() {
+
+}
