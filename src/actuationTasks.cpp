@@ -2,7 +2,7 @@
 // Created by HP Envy on 02/03/2026.
 //
 
-
+#include <TaskScheduler.h>
 #include "motorDrivers.h" // Motor drivers and tests
 
 #include "actuationTasks.h"
