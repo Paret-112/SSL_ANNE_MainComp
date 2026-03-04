@@ -53,7 +53,7 @@ void setup() {
 
   wifiInitialization(listeningPort, status, ssid, pass);
 
-  // Create a task that's scheduled every second
+  // Main checking packages task
   taskManager.schedule(repeatMillis(1500), [] {
     checkPackets(packetBuffer, currentTime, lastPacketID);
     CommandPacket packet;
