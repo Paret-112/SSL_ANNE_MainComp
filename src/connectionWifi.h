@@ -20,11 +20,12 @@ struct __attribute__((packed)) CommandPacket {
     bool collectorOnQ;
     bool shootKickerAtEnd;
     int gameState;
+    int packetID;
 };
 
 void printWifiStatus();
 void wifiInitialization(unsigned int, int, char[], char[]);
-void checkPackets(u_int8_t[], unsigned long);
+void checkPackets(u_int8_t[], unsigned long, int);
 
 
 #endif //SSL_ANNE_MAIN_CONNECTIONWIFI_H

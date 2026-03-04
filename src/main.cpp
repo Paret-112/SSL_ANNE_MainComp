@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include <TaskManagerIO.h>
 
+#include "actuationTasks.h"
 #include "pinOut.h" // Check and change before use!
 #include "projectSettings.h" // Shh, secrets live here, make a new one or replace secrets in code for local tests
 
@@ -24,6 +25,9 @@ char testPacket[256] = "motorTest";
 unsigned long previousTime = millis();
 unsigned long currentTime = millis();
 
+int lastPacketID = 0;
+
+CommandPacket packet;
 
 void setup() {
   // put your setup code here, to run once:
@@ -54,7 +58,6 @@ void setup() {
   // Main checking packages task
   taskManager.schedule(repeatMillis(1500), [] {
     checkPackets(packetBuffer, currentTime, lastPacketID);
-    CommandPacket packet;
     memcpy(&packet, packetBuffer, sizeof(packet));
     if (packet.robot_id == ROBOTID) {
       if (packet.packetID == lastPacketID) return;

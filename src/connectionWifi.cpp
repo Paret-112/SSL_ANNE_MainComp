@@ -59,7 +59,7 @@ void wifiInitialization(const unsigned int localPort, int status, char ssid[], c
     Serial.println("\nWeee!");
 }
 
-void checkPackets(uint8_t packetBuffer[], unsigned long systemTime) {
+void checkPackets(uint8_t packetBuffer[], unsigned long systemTime, int packetID) {
     int packetSize = Udp.parsePacket();
     // Serial.print("Checked for packet at: ");
     // Serial.println(systemTime);
