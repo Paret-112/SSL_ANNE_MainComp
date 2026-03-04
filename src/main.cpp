@@ -1,7 +1,6 @@
 #include <Arduino.h>
 
 #include <WiFi.h>
-#include <TaskManagerIO.h>
 
 #include "actuationTasks.h"
 #include "pinOut.h" // Check and change before use!
@@ -56,23 +55,21 @@ void setup() {
   wifiInitialization(listeningPort, status, ssid, pass);
 
   // Main checking packages task
-  taskManager.schedule(repeatMillis(1500), [] {
-    checkPackets(packetBuffer, currentTime, lastPacketID);
-    memcpy(&packet, packetBuffer, sizeof(packet));
-    if (packet.robot_id == ROBOTID) {
-      if (packet.packetID == lastPacketID) return;
-      taskManager.reset();
-      motorTurnTask(packet.angle1, 1, TURN_SPEED);
-      motorRunTask(packet.distance, 255, ACTUAL_SPEED);
-      motorTurnTask(packet.angle2, 0, TURN_SPEED);
-    }
-  });
+
+  checkPackets(packetBuffer, currentTime, lastPacketID);
+  memcpy(&packet, packetBuffer, sizeof(packet));
+  if (packet.robot_id == ROBOTID) {
+    if (packet.packetID == lastPacketID) return;
+    motorTurnTask(packet.angle1, 1, TURN_SPEED);
+    motorRunTask(packet.distance, 255, ACTUAL_SPEED);
+    motorTurnTask(packet.angle2, 0, TURN_SPEED);
+  }
+
 
 }
 
 void loop() {
   currentTime = millis();
-  taskManager.runLoop();
   // if there's data available, read a packet
 
 
