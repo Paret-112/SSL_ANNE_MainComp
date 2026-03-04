@@ -2,6 +2,7 @@
 
 #include <WiFi.h>
 
+#include <TaskScheduler.h>
 #include "actuationTasks.h"
 #include "pinOut.h" // Check and change before use!
 #include "projectSettings.h" // Shh, secrets live here, make a new one or replace secrets in code for local tests
@@ -25,6 +26,8 @@ unsigned long previousTime = millis();
 unsigned long currentTime = millis();
 
 int lastPacketID = 0;
+
+Scheduler mainScheduler;
 
 CommandPacket packet;
 
@@ -60,10 +63,13 @@ void setup() {
   memcpy(&packet, packetBuffer, sizeof(packet));
   if (packet.robot_id == ROBOTID) {
     if (packet.packetID == lastPacketID) return;
-    motorTurnTask(packet.angle1, 1, TURN_SPEED);
-    motorRunTask(packet.distance, 255, ACTUAL_SPEED);
-    motorTurnTask(packet.angle2, 0, TURN_SPEED);
+    // motorTurnTask(packet.angle1, 1, TURN_SPEED);
+    // motorRunTask(packet.distance, 255, ACTUAL_SPEED);
+    // motorTurnTask(packet.angle2, 0, TURN_SPEED);
   }
+  mainScheduler.init();
+  mainScheduler.enable();
+
 
 
 }
@@ -71,7 +77,7 @@ void setup() {
 void loop() {
   currentTime = millis();
   // if there's data available, read a packet
-
+  mainScheduler.init();
 
   // Set motor speed factor.
   analogWrite(PIN_MOTDR_L1_SPD, 128);

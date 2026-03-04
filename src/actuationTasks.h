@@ -6,7 +6,7 @@
 #define SSL_ANNE_MAINCOMP_ACTUATIONTASKS_H
 
 void motorTestTask();
-void motorRunTask(int, int, int);
+void motorRunTaskCallback(int, int, int);
 void motorTurnTask(int, int, int);
 
 #endif //SSL_ANNE_MAINCOMP_ACTUATIONTASKS_H
