@@ -51,13 +51,18 @@ void setup() {
 
   wifiInitialization(listeningPort, status, ssid, pass);
 
-  // Create a task that's scheduled every second
-  taskManager.schedule(repeatMillis(100), [] {
-    checkPackets(packetBuffer, currentTime);
-  });
-  taskManager.schedule(repeatSeconds(1), [] {
-    digitalWrite(PIN_MOTPUMP_OUT, HIGH);
-    analogWrite(PIN_MOTPUMP_SPD, 500);
+  // Main checking packages task
+  taskManager.schedule(repeatMillis(1500), [] {
+    checkPackets(packetBuffer, currentTime, lastPacketID);
+    CommandPacket packet;
+    memcpy(&packet, packetBuffer, sizeof(packet));
+    if (packet.robot_id == ROBOTID) {
+      if (packet.packetID == lastPacketID) return;
+      taskManager.reset();
+      motorTurnTask(packet.angle1, 1, TURN_SPEED);
+      motorRunTask(packet.distance, 255, ACTUAL_SPEED);
+      motorTurnTask(packet.angle2, 0, TURN_SPEED);
+    }
   });
 
 }
