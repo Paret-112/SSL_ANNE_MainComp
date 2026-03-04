@@ -64,25 +64,6 @@ void setup() {
       motorTurnTask(packet.angle1, 1, TURN_SPEED);
       motorRunTask(packet.distance, 255, ACTUAL_SPEED);
       motorTurnTask(packet.angle2, 0, TURN_SPEED);
-      Serial.println("----New Command----");
-      Serial.println(packet.angle1);
-      Serial.println(packet.distance);
-      Serial.println(packet.angle2);
-      Serial.println(packet.collectorOnQ);
-      Serial.println(packet.shootKickerAtEnd);
-      Serial.println(packet.gameState);
-      Serial.println("-------------------");
-      packet.reset();
-      packetBuffer[0] = 0;
-      Serial.println("----New Command----");
-      Serial.println(packet.angle1);
-      Serial.println(packet.distance);
-      Serial.println(packet.angle2);
-      Serial.println(packet.collectorOnQ);
-      Serial.println(packet.shootKickerAtEnd);
-      Serial.println(packet.gameState);
-      Serial.println("-------------------");
-
     }
   });
 }
