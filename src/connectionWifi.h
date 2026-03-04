@@ -17,14 +17,25 @@ struct __attribute__((packed)) CommandPacket {
     int angle1;
     int distance;
     int angle2;
-    bool collectorOnQ;
-    bool shootKickerAtEnd;
+    int collectorOnQ;
+    int shootKickerAtEnd;
     int gameState;
+    int packetID;
+
+    void reset() {
+        uint8_t msg_type = 0;
+        uint8_t robot_id = 0;
+        angle1 = 0;
+        distance = 0;
+        angle2 = 0;
+        collectorOnQ = 0;
+    }
+
 };
 
 void printWifiStatus();
 void wifiInitialization(unsigned int, int, char[], char[]);
-void checkPackets(u_int8_t[], unsigned long);
+void checkPackets(u_int8_t[], unsigned long, int);
 
 
 #endif //SSL_ANNE_MAIN_CONNECTIONWIFI_H

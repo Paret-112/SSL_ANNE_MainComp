@@ -5,8 +5,13 @@
 #ifndef SSL_ANNE_MAIN_MOTORDRIVERS_H
 #define SSL_ANNE_MAIN_MOTORDRIVERS_H
 
-void motorTest();
 void motorStop();
-void motorRun(int);
+void motorRun(int, unsigned int);
+void motorTurn(int);
+
+void motorKick();
+void pumpActuateIn();
+void pumpActuateOut();
+void pumpActuateStop();
 
 #endif //SSL_ANNE_MAIN_MOTORDRIVERS_H

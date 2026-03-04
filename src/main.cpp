@@ -7,13 +7,15 @@
 #include "projectSettings.h" // Shh, secrets live here, make a new one or replace secrets in code for local tests
 
 #include "connectionWifi.h" // Wifi connection module
-#include "motorDrivers.h" // Motor drivers and tests
+#include "actuationTasks.h" // Motor tasks
 
 int status = WL_IDLE_STATUS;
 
 char ssid[] = TESTSSID;        // your network SSID (name)
 char pass[] = TESTPASS;    // your network password (use for WPA, or use as key for WEP)
 int keyIndex = 0;            // your network key index number (needed only for WEP)
+
+int lastPacketID = 0;
 
 const unsigned int listeningPort = LOCALPORT;      // local port to listen on
 
@@ -52,14 +54,18 @@ void setup() {
   wifiInitialization(listeningPort, status, ssid, pass);
 
   // Create a task that's scheduled every second
-  taskManager.schedule(repeatMillis(100), [] {
-    checkPackets(packetBuffer, currentTime);
+  taskManager.schedule(repeatMillis(1500), [] {
+    checkPackets(packetBuffer, currentTime, lastPacketID);
+    CommandPacket packet;
+    memcpy(&packet, packetBuffer, sizeof(packet));
+    if (packet.robot_id == ROBOTID) {
+      if (packet.packetID == lastPacketID) return;
+      taskManager.reset();
+      motorTurnTask(packet.angle1, 1, TURN_SPEED);
+      motorRunTask(packet.distance, 255, ACTUAL_SPEED);
+      motorTurnTask(packet.angle2, 0, TURN_SPEED);
+    }
   });
-  taskManager.schedule(repeatSeconds(1), [] {
-    digitalWrite(PIN_MOTPUMP_OUT, HIGH);
-    analogWrite(PIN_MOTPUMP_SPD, 500);
-  });
-
 }
 
 void loop() {
