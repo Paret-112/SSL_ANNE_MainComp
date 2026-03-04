@@ -14,6 +14,3 @@
 #define ROBOTID 3
 
 #define SERIAL_BAUD 115200
-
-#define TURN_SPEED 1000
-#define ACTUAL_SPEED 1000

@@ -7,15 +7,13 @@
 #include "projectSettings.h" // Shh, secrets live here, make a new one or replace secrets in code for local tests
 
 #include "connectionWifi.h" // Wifi connection module
-#include "actuationTasks.h" // Motor tasks
+#include "motorDrivers.h" // Motor drivers and tests
 
 int status = WL_IDLE_STATUS;
 
 char ssid[] = TESTSSID;        // your network SSID (name)
 char pass[] = TESTPASS;    // your network password (use for WPA, or use as key for WEP)
 int keyIndex = 0;            // your network key index number (needed only for WEP)
-
-int lastPacketID = 0;
 
 const unsigned int listeningPort = LOCALPORT;      // local port to listen on
 
@@ -66,6 +64,7 @@ void setup() {
       motorTurnTask(packet.angle2, 0, TURN_SPEED);
     }
   });
+
 }
 
 void loop() {
