@@ -59,7 +59,6 @@ void setup() {
     digitalWrite(PIN_MOTPUMP_OUT, HIGH);
     analogWrite(PIN_MOTPUMP_SPD, 500);
   });
-
 }
 
 void loop() {
