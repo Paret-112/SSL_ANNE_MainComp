@@ -10,24 +10,26 @@
 #include "connectionWifi.h" // Wifi connection module
 #include "motorDrivers.h" // Motor drivers and tests
 
-Task tDriveForward(0, 1,&driveForward);
-Task tDriveBackward(0, 1, &driveBackward);
-Task tDriveFlankLeftFor(0, 1, &driveFlankLeftFor);
-Task tDriveFlankLeftBac(0, 1, &driveFlankLeftBac);
-Task tDriveFlankRightBac(0, 1,&driveFlankRightBac);
-Task tDriveFlankRightFor(0, 1,&driveFlankRightFor);
-Task tDriveStop(0, 1,&driveStop);
+Scheduler mainScheduler;
 
-Task tTurnLeft(0, 1,&turnLeft);
-Task tTurnRight(0, 1,&turnRight);
-Task tTurnStop(0, 1,&turnStop);
+Task tDriveForward(0, 1,&driveForward, &mainScheduler);
+Task tDriveBackward(0, 1, &driveBackward, &mainScheduler);
+Task tDriveFlankLeftFor(0, 1, &driveFlankLeftFor, &mainScheduler);
+Task tDriveFlankLeftBac(0, 1, &driveFlankLeftBac, &mainScheduler);
+Task tDriveFlankRightBac(0, 1,&driveFlankRightBac, &mainScheduler);
+Task tDriveFlankRightFor(0, 1,&driveFlankRightFor, &mainScheduler);
+Task tDriveStop(0, 1,&driveStop, &mainScheduler);
 
-Task tPrepareKick(0, 1,&prepareKick);
-Task tKick(0, 1,&kick);
+Task tTurnLeft(0, 1,&turnLeft, &mainScheduler);
+Task tTurnRight(0, 1,&turnRight, &mainScheduler);
+Task tTurnStop(0, 1,&turnStop, &mainScheduler);
 
-Task tPumpActuateIn(0, 1,&pumpActuateIn);
-Task tPumpActuateOut(0, 1,&pumpActuateOut);
-Task tPumpStop(0, 1,&pumpActuateStop);
+Task tPrepareKick(0, 1,&prepareKick, &mainScheduler);
+Task tKick(0, 1,&kick, &mainScheduler);
+
+Task tPumpActuateIn(0, 1,&pumpActuateIn, &mainScheduler);
+Task tPumpActuateOut(0, 1,&pumpActuateOut, &mainScheduler);
+Task tPumpStop(0, 1,&pumpActuateStop, &mainScheduler);
 
 int status = WL_IDLE_STATUS;
 
@@ -45,8 +47,6 @@ unsigned long previousTime = millis();
 unsigned long currentTime = millis();
 
 int lastPacketID = 0;
-
-Scheduler mainScheduler;
 
 CommandPacket packet;
 
@@ -90,6 +90,7 @@ void loop() {
   memcpy(&packet, packetBuffer, sizeof(packet));
   if (packet.robot_id == ROBOTID) {
     if (packet.packetID == lastPacketID) return;
+
 
   }
   // Set motor speed factor.
