@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #include <WiFi.h>
-#include <TaskManagerIO.h>
+#include <TaskScheduler.h>
 
 #include "actuationTasks.h"
 #include "pinOut.h" // Check and change before use!
@@ -9,6 +9,25 @@
 
 #include "connectionWifi.h" // Wifi connection module
 #include "motorDrivers.h" // Motor drivers and tests
+
+Task tDriveForward(0, 1,&driveForward);
+Task tDriveBackward(0, 1, &driveBackward);
+Task tDriveFlankLeftFor(0, 1, &driveFlankLeftFor);
+Task tDriveFlankLeftBac(0, 1, &driveFlankLeftBac);
+Task tDriveFlankRightBac(0, 1,&driveFlankRightBac);
+Task tDriveFlankRightFor(0, 1,&driveFlankRightFor);
+Task tDriveStop(0, 1,&driveStop);
+
+Task tTurnLeft(0, 1,&turnLeft);
+Task tTurnRight(0, 1,&turnRight);
+Task tTurnStop(0, 1,&turnStop);
+
+Task tPrepareKick(0, 1,&prepareKick);
+Task tKick(0, 1,&kick);
+
+Task tPumpActuateIn(0, 1,&pumpActuateIn);
+Task tPumpActuateOut(0, 1,&pumpActuateOut);
+Task tPumpStop(0, 1,&pumpActuateStop);
 
 int status = WL_IDLE_STATUS;
 
@@ -26,6 +45,8 @@ unsigned long previousTime = millis();
 unsigned long currentTime = millis();
 
 int lastPacketID = 0;
+
+Scheduler mainScheduler;
 
 CommandPacket packet;
 
@@ -56,25 +77,21 @@ void setup() {
   wifiInitialization(listeningPort, status, ssid, pass);
 
   // Main checking packages task
-  taskManager.schedule(repeatMillis(1500), [] {
-    checkPackets(packetBuffer, currentTime, lastPacketID);
-    memcpy(&packet, packetBuffer, sizeof(packet));
-    if (packet.robot_id == ROBOTID) {
-      if (packet.packetID == lastPacketID) return;
-      taskManager.reset();
-      motorTurnTask(packet.angle1, 1, TURN_SPEED);
-      motorRunTask(packet.distance, 255, ACTUAL_SPEED);
-      motorTurnTask(packet.angle2, 0, TURN_SPEED);
-    }
-  });
+  mainScheduler.init();
+
+
+
 }
 
 void loop() {
   currentTime = millis();
-  taskManager.runLoop();
   // if there's data available, read a packet
+  checkPackets(packetBuffer, currentTime, lastPacketID);
+  memcpy(&packet, packetBuffer, sizeof(packet));
+  if (packet.robot_id == ROBOTID) {
+    if (packet.packetID == lastPacketID) return;
 
-
+  }
   // Set motor speed factor.
   analogWrite(PIN_MOTDR_L1_SPD, 128);
   analogWrite(PIN_MOTDR_L2_SPD, 128);

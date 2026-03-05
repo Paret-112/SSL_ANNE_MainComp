@@ -59,11 +59,11 @@ void wifiInitialization(const unsigned int localPort, int status, char ssid[], c
     Serial.println("\nWeee!");
 }
 
-void checkPackets(uint8_t packetBuffer[], unsigned long systemTime, int packetID) {
+int checkPackets(uint8_t packetBuffer[], unsigned long systemTime, int packetID) {
     int packetSize = Udp.parsePacket();
     // Serial.print("Checked for packet at: ");
     // Serial.println(systemTime);
-    if (!packetSize) return;
+    if (!packetSize) return 0;
 
     Serial.print("Received packet of size ");
     Serial.print(packetSize);
@@ -92,16 +92,17 @@ void checkPackets(uint8_t packetBuffer[], unsigned long systemTime, int packetID
         Udp.endPacket();
 
         Serial.println("Discovery 'n tie reply sent");
+        return 0;
     }
 
     if (msg_type == MSG_COMMAND) {
 
-        if (packetSize < sizeof(CommandPacket)) return;
+        if (packetSize < sizeof(CommandPacket)) return 394;
 
-        CommandPacket packet;
+        CommandPacket packet{};
         memcpy(&packet, packetBuffer, sizeof(packet));
 
-        if (packet.robot_id != ROBOTID) return;
+        if (packet.robot_id != ROBOTID) return 679;
 
         Serial.println("----New Command----");
         Serial.println(packet.angle1);
@@ -119,5 +120,7 @@ void checkPackets(uint8_t packetBuffer[], unsigned long systemTime, int packetID
         Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
         Udp.write(reply, 2);
         Udp.endPacket();
+        return 1;
     }
+    return 0;
 }
