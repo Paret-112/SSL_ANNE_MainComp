@@ -7,6 +7,12 @@
 
 void motorTest();
 void motorStop();
-void motorRun(int);
+void motorRun(int, int);
+
+void motorKick();
+void motorKickPrepare();
+void pumpActuateIn();
+void pumpActuateOut();
+void pumpActuateStop();
 
 #endif //SSL_ANNE_MAIN_MOTORDRIVERS_H
