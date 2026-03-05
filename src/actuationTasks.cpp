@@ -7,31 +7,32 @@
 #include "actuationTasks.h"
 
 int turnDirection;
+int globalSpeedMod;
 
 
 
 void driveForward() {
-    motorRun(0, 255);
+    motorRun(0, 255/globalSpeedMod);
 }
 
 void driveBackward() {
-    motorRun(1, 255);
+    motorRun(1, 255/globalSpeedMod);
 }
 
 void driveFlankRightFor() {
-    motorRun(2, 255);
+    motorRun(2, 255/globalSpeedMod);
 }
 
 void driveFlankRightBac() {
-    motorRun(3, 255);
+    motorRun(3, 255/globalSpeedMod);
 }
 
 void driveFlankLeftFor() {
-    motorRun(4, 255);
+    motorRun(4, 255/globalSpeedMod);
 }
 
 void driveFlankLeftBac() {
-    motorRun(5, 255);
+    motorRun(5, 255/globalSpeedMod);
 }
 
 void driveStop() {

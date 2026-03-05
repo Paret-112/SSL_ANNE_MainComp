@@ -48,6 +48,13 @@ unsigned long currentTime = millis();
 
 int lastPacketID = 0;
 
+int turnInitial;
+int goDistance;
+int turnLate;
+int collectorOnQ;
+int shootKickerAtEnd;
+int gameState;
+
 CommandPacket packet;
 
 void setup() {
@@ -78,9 +85,24 @@ void setup() {
 
   // Main checking packages task
   mainScheduler.init();
+  mainScheduler.addTask(tDriveForward);
+  mainScheduler.addTask(tDriveBackward);
+  mainScheduler.addTask(tDriveFlankLeftFor);
+  mainScheduler.addTask(tDriveFlankLeftBac);
+  mainScheduler.addTask(tDriveFlankRightFor);
+  mainScheduler.addTask(tDriveFlankRightBac);
+  mainScheduler.addTask(tDriveStop);
 
+  mainScheduler.addTask(tTurnLeft);
+  mainScheduler.addTask(tTurnRight);
+  mainScheduler.addTask(tTurnStop);
 
+  mainScheduler.addTask(tPrepareKick);
+  mainScheduler.addTask(tKick);
 
+  mainScheduler.addTask(tPumpActuateIn);
+  mainScheduler.addTask(tPumpActuateOut);
+  mainScheduler.addTask(tPumpStop);
 }
 
 void loop() {
@@ -88,16 +110,55 @@ void loop() {
   // if there's data available, read a packet
   checkPackets(packetBuffer, currentTime, lastPacketID);
   memcpy(&packet, packetBuffer, sizeof(packet));
-  if (packet.robot_id == ROBOTID) {
-    if (packet.packetID == lastPacketID) return;
+  if (packet.robot_id != ROBOTID) return;
+  if (packet.packetID == lastPacketID) return;
+  lastPacketID = packet.packetID;
+  turnInitial = packet.angle1;
+  goDistance = packet.distance;
+  turnLate = packet.angle2;
+  collectorOnQ = packet.collectorOnQ;
+  shootKickerAtEnd = packet.shootKickerAtEnd;
+  gameState = packet.gameState;
 
-
+  if (gameState == 3) {
+    mainScheduler.disableAll();
+    tDriveStop.enable();
+    return;
   }
-  // Set motor speed factor.
-  analogWrite(PIN_MOTDR_L1_SPD, 128);
-  analogWrite(PIN_MOTDR_L2_SPD, 128);
-  analogWrite(PIN_MOTDR_R1_SPD, 128);
-  analogWrite(PIN_MOTDR_R2_SPD, 128);
+
+  if (turnInitial) {
+    if (!tDriveStop.isEnabled() and !tTurnStop.isEnabled()) {
+      if (turnInitial > 0) {
+        tTurnRight.enable();
+      } else {
+        tTurnLeft.enable();
+      }
+    tTurnStop.enableDelayed(turnInitial/(TURN_SPEED/1000));
+    }
+  }
+
+  if (goDistance) {
+    if (!tDriveStop.isEnabled() and !tTurnStop.isEnabled()) {
+      if (goDistance > 0) {
+        tDriveForward.enable();
+      } else {
+        tDriveBackward.enable();
+      }
+      tDriveStop.enableDelayed(goDistance/(ACTUAL_SPEED/1000));
+    }
+  }
+
+  if (turnLate) {
+    if (!tDriveStop.isEnabled() and !tTurnStop.isEnabled()) {
+      if (turnInitial > 0) {
+        tTurnRight.enable();
+      } else {
+        tTurnLeft.enable();
+      }
+      tTurnStop.enableDelayed(turnInitial/(TURN_SPEED/1000));
+    }
+  }
+
 }
 
 
