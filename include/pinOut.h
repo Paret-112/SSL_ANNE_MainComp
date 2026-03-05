@@ -29,4 +29,6 @@
 #define PIN_MOTKICK_SPD 6
 #define PIN_MOTPUMP_SPD 7
 
+#define PIN_VOLTAGE A0 // Temp, if we want to make one for inputs too
+
 #endif //SSL_ANNE_MAIN_PINOUT_H

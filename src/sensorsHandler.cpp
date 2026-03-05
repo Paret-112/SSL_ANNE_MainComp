@@ -1,5 +1,7 @@
+
 #include "FastIMU.h"
 #include <Wire.h>
+#include "pinOut.h"
 
 #define IMU_ADDRESS 0x68
 MPU6500 IMU;
@@ -54,4 +56,8 @@ int getGyroTemp(){
     }
 
     return 0;
+}
+
+int getVoltage(){
+    return map(analogRead(PIN_VOLTAGE),0,1024,0,25);
 }
