@@ -27,5 +27,7 @@ void printWifiStatus();
 void wifiInitialization(unsigned int, int, char[], char[]);
 int checkPackets(u_int8_t[], unsigned long, int);
 
+void networkCheck();
+
 
 #endif //SSL_ANNE_MAIN_CONNECTIONWIFI_H

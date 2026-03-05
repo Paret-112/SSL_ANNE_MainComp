@@ -10,41 +10,36 @@
 #include "connectionWifi.h" // Wifi connection module
 #include "motorDrivers.h" // Motor drivers and tests
 
-Scheduler mainScheduler;
+void gameStatus();
+void networkStatus();
 
-Task tDriveForward(0, 1,&driveForward, &mainScheduler);
-Task tDriveBackward(0, 1, &driveBackward, &mainScheduler);
-Task tDriveFlankLeftFor(0, 1, &driveFlankLeftFor, &mainScheduler);
-Task tDriveFlankLeftBac(0, 1, &driveFlankLeftBac, &mainScheduler);
-Task tDriveFlankRightBac(0, 1,&driveFlankRightBac, &mainScheduler);
-Task tDriveFlankRightFor(0, 1,&driveFlankRightFor, &mainScheduler);
-Task tDriveStop(0, 1,&driveStop, &mainScheduler);
+Scheduler runner;
 
-Task tTurnLeft(0, 1,&turnLeft, &mainScheduler);
-Task tTurnRight(0, 1,&turnRight, &mainScheduler);
-Task tTurnStop(0, 1,&turnStop, &mainScheduler);
+Task tNetworkCheck(100, -1,&networkCheck, &runner, true);
+Task tGameChecker(100, -1, &gameStatus, &runner, true);
 
-Task tPrepareKick(0, 1,&prepareKick, &mainScheduler);
-Task tKick(0, 1,&kick, &mainScheduler);
+Task tDriveForward(10, 1,&driveForward, &runner);
+Task tDriveBackward(10, 1, &driveBackward, &runner);
+Task tDriveFlankLeftFor(10, 1, &driveFlankLeftFor, &runner);
+Task tDriveFlankLeftBac(10, 1, &driveFlankLeftBac, &runner);
+Task tDriveFlankRightBac(10, 1,&driveFlankRightBac, &runner);
+Task tDriveFlankRightFor(10, 1,&driveFlankRightFor, &runner);
+Task tDriveStop(10, 1,&driveStop, &runner);
 
-Task tPumpActuateIn(0, 1,&pumpActuateIn, &mainScheduler);
-Task tPumpActuateOut(0, 1,&pumpActuateOut, &mainScheduler);
-Task tPumpStop(0, 1,&pumpActuateStop, &mainScheduler);
+Task tTurnLeft(10, 1,&turnLeft, &runner);
+Task tTurnRight(10, 1,&turnRight, &runner);
+Task tTurnStop(10, 1,&turnStop, &runner);
+
+Task tPrepareKick(10, 1,&prepareKick, &runner);
+Task tKick(10, 1,&kick, &runner);
+
+Task tPumpActuateIn(10, 1,&pumpActuateIn, &runner);
+Task tPumpActuateOut(10, 1,&pumpActuateOut, &runner);
+Task tPumpStop(10, 1,&pumpActuateStop, &runner);
 
 int status = WL_IDLE_STATUS;
 
-char ssid[] = TESTSSID;        // your network SSID (name)
-char pass[] = TESTPASS;    // your network password (use for WPA, or use as key for WEP)
-int keyIndex = 0;            // your network key index number (needed only for WEP)
-
-const unsigned int listeningPort = LOCALPORT;      // local port to listen on
-
 u_int8_t packetBuffer[256]; //buffer to hold incoming packet
-char  replyBuffer[] = "acknowledged";       // a string to send back
-char testPacket[256] = "motorTest";
-
-unsigned long previousTime = millis();
-unsigned long currentTime = millis();
 
 int lastPacketID = 0;
 
@@ -53,9 +48,17 @@ int goDistance;
 int turnLate;
 int collectorOnQ;
 int shootKickerAtEnd;
-int gameState;
+int gameState = 0;
+
+unsigned long currentTime = millis();
 
 CommandPacket packet;
+
+char ssid[] = TESTSSID;        // your network SSID (name)
+char pass[] = TESTPASS;    // your network password (use for WPA, or use as key for WEP)
+int keyIndex = 0;            // your network key index number (needed only for WEP)
+
+const unsigned int listeningPort = LOCALPORT;      // local port to listen on
 
 void setup() {
   // put your setup code here, to run once:
@@ -84,56 +87,63 @@ void setup() {
   wifiInitialization(listeningPort, status, ssid, pass);
 
   // Main checking packages task
-  mainScheduler.init();
-  mainScheduler.addTask(tDriveForward);
-  mainScheduler.addTask(tDriveBackward);
-  mainScheduler.addTask(tDriveFlankLeftFor);
-  mainScheduler.addTask(tDriveFlankLeftBac);
-  mainScheduler.addTask(tDriveFlankRightFor);
-  mainScheduler.addTask(tDriveFlankRightBac);
-  mainScheduler.addTask(tDriveStop);
+  runner.init();
 
-  mainScheduler.addTask(tTurnLeft);
-  mainScheduler.addTask(tTurnRight);
-  mainScheduler.addTask(tTurnStop);
+  runner.addTask(tDriveForward);
+  runner.addTask(tDriveBackward);
+  runner.addTask(tDriveFlankLeftFor);
+  runner.addTask(tDriveFlankLeftBac);
+  runner.addTask(tDriveFlankRightFor);
+  runner.addTask(tDriveFlankRightBac);
+  runner.addTask(tDriveStop);
 
-  mainScheduler.addTask(tPrepareKick);
-  mainScheduler.addTask(tKick);
+  runner.addTask(tTurnLeft);
+  runner.addTask(tTurnRight);
+  runner.addTask(tTurnStop);
 
-  mainScheduler.addTask(tPumpActuateIn);
-  mainScheduler.addTask(tPumpActuateOut);
-  mainScheduler.addTask(tPumpStop);
+  runner.addTask(tPrepareKick);
+  runner.addTask(tKick);
+
+  runner.addTask(tPumpActuateIn);
+  runner.addTask(tPumpActuateOut);
+  runner.addTask(tPumpStop);
+
+  runner.addTask(tNetworkCheck);
+  runner.addTask(tGameChecker);
+
+  tNetworkCheck.enable();
+  tGameChecker.enable();
 }
 
 void loop() {
-  currentTime = millis();
-  // if there's data available, read a packet
-  checkPackets(packetBuffer, currentTime, lastPacketID);
-  memcpy(&packet, packetBuffer, sizeof(packet));
-  if (packet.robot_id != ROBOTID) return;
-  if (packet.packetID == lastPacketID) return;
-  lastPacketID = packet.packetID;
-  turnInitial = packet.angle1;
-  goDistance = packet.distance;
-  turnLate = packet.angle2;
-  collectorOnQ = packet.collectorOnQ;
-  shootKickerAtEnd = packet.shootKickerAtEnd;
-  gameState = packet.gameState;
+  runner.execute();
+}
 
+void gameStatus() {
+  Serial.println("Game status checking");
   if (gameState == 3) {
-    mainScheduler.disableAll();
+    runner.disableAll();
+    globalSpeedModSet(255);
     tDriveStop.enable();
     return;
   }
+  Serial.println("Game state checked");
 
   if (turnInitial) {
+    Serial.println("Turn found!");
     if (!tDriveStop.isEnabled() and !tTurnStop.isEnabled()) {
+      Serial.println("No other movement tasks found");
       if (turnInitial > 0) {
         tTurnRight.enable();
+        Serial.println("Turning");
       } else {
         tTurnLeft.enable();
+        Serial.println("Turning");
       }
-    tTurnStop.enableDelayed(turnInitial/(TURN_SPEED/1000));
+      tTurnStop.enableDelayed(turnInitial/(TURN_SPEED/1000));
+      Serial.println("I might be the problem");
+      //tTurnStop.enableDelayed(turnInitial/(TURN_SPEED/1000));
+      //Serial.println("No other movement tasks found");
     }
   }
 
@@ -158,8 +168,21 @@ void loop() {
       tTurnStop.enableDelayed(turnInitial/(TURN_SPEED/1000));
     }
   }
-
 }
 
-
-
+void networkCheck() {
+  Serial.println("Network check");
+  currentTime = millis();
+  // if there's data available, read a packet
+  checkPackets(packetBuffer, currentTime, lastPacketID);
+  memcpy(&packet, packetBuffer, sizeof(packet));
+  if (packet.robot_id != ROBOTID) return;
+  Serial.println("Robot ID checked");
+  lastPacketID = packet.packetID;
+  turnInitial = packet.angle1;
+  goDistance = packet.distance;
+  turnLate = packet.angle2;
+  collectorOnQ = packet.collectorOnQ;
+  shootKickerAtEnd = packet.shootKickerAtEnd;
+  gameState = packet.gameState;
+}

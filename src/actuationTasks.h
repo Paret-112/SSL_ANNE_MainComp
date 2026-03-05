@@ -20,4 +20,6 @@ void turnStop();
 void prepareKick();
 void kick();
 
+void globalSpeedModSet(int);
+
 #endif //SSL_ANNE_MAINCOMP_ACTUATIONTASKS_H

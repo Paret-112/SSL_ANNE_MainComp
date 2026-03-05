@@ -5,18 +5,27 @@
 #include "motorDrivers.h" // Motor drivers
 
 #include "actuationTasks.h"
+#include "connectionWifi.h"
+
+#include <Arduino.h>
+
+#include "projectSettings.h"
 
 int turnDirection;
-int globalSpeedMod;
+int globalSpeedMod = 1;
 
-
+void globalSpeedModSet(int set) {
+    globalSpeedMod = set;
+}
 
 void driveForward() {
     motorRun(0, 255/globalSpeedMod);
+    Serial.println("Forward!!");
 }
 
 void driveBackward() {
     motorRun(1, 255/globalSpeedMod);
+    Serial.println("BACK, BACK!!!");
 }
 
 void driveFlankRightFor() {
@@ -37,23 +46,29 @@ void driveFlankLeftBac() {
 
 void driveStop() {
     motorStop();
+    Serial.println("Stoping");
 }
 
 void turnRight() {
     motorTurn(1);
+    Serial.println("Turning Right");
 }
 void turnLeft() {
     motorTurn(-1);
+    Serial.println("Turning Left");
 }
 
 void turnStop() {
     motorStop();
+    Serial.println("Not turning ig... fine by me");
 }
 
 void kick() {
     motorKick();
+    Serial.println("SCOOOOOORRREEEE!!");
 }
 
 void prepareKick() {
     motorKickPrepare();
+    Serial.println("And he readies his foot!");
 }
