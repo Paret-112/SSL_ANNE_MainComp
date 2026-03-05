@@ -67,7 +67,6 @@ void setup() {
       motorTurnTask(packet.angle2, 0, TURN_SPEED);
     }
   });
-
 }
 
 void loop() {
