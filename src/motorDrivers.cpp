@@ -81,19 +81,19 @@ void motorRun(int direction, unsigned int speed) {
     }
 }
 
-void motorTurn(int degrees) {
+void motorTurn(int direction) {
     analogWrite(PIN_MOTDR_L1_SPD, 128);
     analogWrite(PIN_MOTDR_L2_SPD, 128);
     analogWrite(PIN_MOTDR_R1_SPD, 128);
     analogWrite(PIN_MOTDR_R2_SPD, 128);
 
-    if (degrees > 0) {
+    if (direction == -1) {
         digitalWrite(PIN_MOTDR_L1_FOR, HIGH);
         digitalWrite(PIN_MOTDR_L2_FOR, HIGH);
         digitalWrite(PIN_MOTDR_R1_BAC, HIGH);
         digitalWrite(PIN_MOTDR_R2_BAC, HIGH);
     }
-    if (degrees < 0) {
+    if (direction == 1) {
         digitalWrite(PIN_MOTDR_L1_BAC, HIGH);
         digitalWrite(PIN_MOTDR_L2_BAC, HIGH);
         digitalWrite(PIN_MOTDR_R1_FOR, HIGH);
