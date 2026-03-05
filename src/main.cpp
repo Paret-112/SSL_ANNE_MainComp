@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#define _TASK_SCHEDULING_OPTIONS
+
 #include <WiFi.h>
 #include <TaskScheduler.h>
 
@@ -15,8 +17,11 @@ void networkStatus();
 
 Scheduler runner;
 
-Task tNetworkCheck(100, -1,&networkCheck, &runner, true);
-Task tGameChecker(100, -1, &gameStatus, &runner, true);
+// Task tNetworkCheck(100, -1,&networkCheck, &runner, true);
+// Task tGameChecker(100, -1, &gameStatus, &runner, true);
+
+Task tTurnLeftFirst(100, 1, &turnLeft, &runner);
+Task tTurnRightFirst(100, 1, &turnRight, &runner);
 
 Task tDriveForward(10, 1,&driveForward, &runner);
 Task tDriveBackward(10, 1, &driveBackward, &runner);
@@ -26,8 +31,8 @@ Task tDriveFlankRightBac(10, 1,&driveFlankRightBac, &runner);
 Task tDriveFlankRightFor(10, 1,&driveFlankRightFor, &runner);
 Task tDriveStop(10, 1,&driveStop, &runner);
 
-Task tTurnLeft(10, 1,&turnLeft, &runner);
-Task tTurnRight(10, 1,&turnRight, &runner);
+Task tTurnLeftLast(10, 1,&turnLeft, &runner);
+Task tTurnRightLast(10, 1,&turnRight, &runner);
 Task tTurnStop(10, 1,&turnStop, &runner);
 
 Task tPrepareKick(10, 1,&prepareKick, &runner);
@@ -89,6 +94,15 @@ void setup() {
   // Main checking packages task
   runner.init();
 
+  // runner.addTask(tNetworkCheck);
+  // runner.addTask(tGameChecker);
+  //
+  // tGameChecker.setSchedulingOption(TASK_SCHEDULE);
+  // tNetworkCheck.setSchedulingOption(TASK_SCHEDULE);
+
+  runner.addTask(tTurnLeftFirst);
+  runner.addTask(tTurnRightFirst);
+
   runner.addTask(tDriveForward);
   runner.addTask(tDriveBackward);
   runner.addTask(tDriveFlankLeftFor);
@@ -97,8 +111,8 @@ void setup() {
   runner.addTask(tDriveFlankRightBac);
   runner.addTask(tDriveStop);
 
-  runner.addTask(tTurnLeft);
-  runner.addTask(tTurnRight);
+  runner.addTask(tTurnLeftLast);
+  runner.addTask(tTurnRightLast);
   runner.addTask(tTurnStop);
 
   runner.addTask(tPrepareKick);
@@ -108,14 +122,13 @@ void setup() {
   runner.addTask(tPumpActuateOut);
   runner.addTask(tPumpStop);
 
-  runner.addTask(tNetworkCheck);
-  runner.addTask(tGameChecker);
-
-  tNetworkCheck.enable();
-  tGameChecker.enable();
+  // tNetworkCheck.enable();
+  // tGameChecker.enable();
 }
 
 void loop() {
+  networkCheck();
+  gameStatus();
   runner.execute();
 }
 
@@ -134,11 +147,11 @@ void gameStatus() {
     if (!tDriveStop.isEnabled() and !tTurnStop.isEnabled()) {
       Serial.println("No other movement tasks found");
       if (turnInitial > 0) {
-        tTurnRight.enable();
-        Serial.println("Turning");
+        tTurnRightFirst.enable();
+        Serial.println("Turning 1");
       } else {
-        tTurnLeft.enable();
-        Serial.println("Turning");
+        tTurnLeftFirst.enable();
+        Serial.println("Turning 2");
       }
       tTurnStop.enableDelayed(turnInitial/(TURN_SPEED/1000));
       Serial.println("I might be the problem");
@@ -161,9 +174,9 @@ void gameStatus() {
   if (turnLate) {
     if (!tDriveStop.isEnabled() and !tTurnStop.isEnabled()) {
       if (turnInitial > 0) {
-        tTurnRight.enable();
+        tTurnRightLast.enable();
       } else {
-        tTurnLeft.enable();
+        tTurnLeftLast.enable();
       }
       tTurnStop.enableDelayed(turnInitial/(TURN_SPEED/1000));
     }
