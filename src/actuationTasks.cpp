@@ -2,27 +2,57 @@
 // Created by HP Envy on 02/03/2026.
 //
 
-
-#include "motorDrivers.h" // Motor drivers and tests
-#include <TaskScheduler.h>
 #include "motorDrivers.h" // Motor drivers
 
 #include "actuationTasks.h"
 
-void motorRunTask(int distance, int speed, int actualSpeed) {
+int turnDirection;
 
 
 
-
-void motorRunTaskCallback(int distance, int speed, int actualSpeed) {
-
+void driveForward() {
+    motorRun(0, 255);
 }
 
-void motorTurnTask(int angle, int firstQ, int turnSpeed) {
-    int turningTime = (angle/turnSpeed)*1000;
-
+void driveBackward() {
+    motorRun(1, 255);
 }
 
-void motorTestTask() {
+void driveFlankRightFor() {
+    motorRun(2, 255);
+}
 
+void driveFlankRightBac() {
+    motorRun(3, 255);
+}
+
+void driveFlankLeftFor() {
+    motorRun(4, 255);
+}
+
+void driveFlankLeftBac() {
+    motorRun(5, 255);
+}
+
+void driveStop() {
+    motorStop();
+}
+
+void turnRight() {
+    motorTurn(1);
+}
+void turnLeft() {
+    motorTurn(-1);
+}
+
+void turnStop() {
+    motorStop();
+}
+
+void kick() {
+    motorKick();
+}
+
+void prepareKick() {
+    motorKickPrepare();
 }
