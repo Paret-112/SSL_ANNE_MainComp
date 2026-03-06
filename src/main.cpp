@@ -58,6 +58,7 @@ int robotState = 0;
 unsigned long currentTime = millis();
 
 CommandPacket packet;
+CommandPacket currentPacket;
 
 char ssid[] = TESTSSID;        // your network SSID (name)
 char pass[] = TESTPASS;    // your network password (use for WPA, or use as key for WEP)
@@ -131,13 +132,9 @@ void networkCheck() {
   // if there's data available, read a packet
   checkPackets(packetBuffer, currentTime, lastPacketID);
   memcpy(&packet, packetBuffer, sizeof(packet));
-  if (packet.robot_id != ROBOTID) return;
-  Serial.println("Robot ID checked");
-  lastPacketID = packet.packetID;
-  turnInitial = packet.angle1;
-  goDistance = packet.distance;
-  turnLate = packet.angle2;
-  collectorOnQ = packet.collectorOnQ;
-  shootKickerAtEnd = packet.shootKickerAtEnd;
-  gameState = packet.gameState;
+  if (packet.robot_id == ROBOTID and packet.packetID != currentPacket.packetID and robotState == 4) {
+    memcpy(&currentPacket, &packet, sizeof(packet));
+    robotState = 0;
+  }
+
 }
