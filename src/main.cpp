@@ -3,7 +3,7 @@
 #define _TASK_SCHEDULING_OPTIONS
 
 #include <WiFi.h>
-#include <TaskScheduler.h>
+#include "LightTaskScheduler.h"
 
 #include "actuationTasks.h"
 #include "pinOut.h" // Check and change before use!
@@ -13,34 +13,31 @@
 #include "motorDrivers.h" // Motor drivers and tests
 
 void gameStatus();
-void networkStatus();
+void networkCheck();
 
-Scheduler runner;
+TaskScheduler runner;
 
-// Task tNetworkCheck(100, -1,&networkCheck, &runner, true);
-// Task tGameChecker(100, -1, &gameStatus, &runner, true);
+Task tCheckNetwork(&networkCheck, 100, false, 7);
+Task tGameStatus(&gameStatus, 200, false, 6);
 
-Task tTurnLeftFirst(100, 1, &turnLeft, &runner);
-Task tTurnRightFirst(100, 1, &turnRight, &runner);
+Task tDriveForward(&driveForward, 10, true, 3);
+Task tDriveBackward(&driveBackward, 10, true, 3);
+Task tDriveFlankLeftFor(&driveFlankLeftFor, 10, true, 3);
+Task tDriveFlankLeftBac(&driveFlankLeftBac, 10, true, 3);
+Task tDriveFlankRightBac(&driveFlankRightBac, 10, true, 3);
+Task tDriveFlankRightFor(&driveFlankRightFor, 10, true, 3);
 
-Task tDriveForward(10, 1,&driveForward, &runner);
-Task tDriveBackward(10, 1, &driveBackward, &runner);
-Task tDriveFlankLeftFor(10, 1, &driveFlankLeftFor, &runner);
-Task tDriveFlankLeftBac(10, 1, &driveFlankLeftBac, &runner);
-Task tDriveFlankRightBac(10, 1,&driveFlankRightBac, &runner);
-Task tDriveFlankRightFor(10, 1,&driveFlankRightFor, &runner);
-Task tDriveStop(10, 1,&driveStop, &runner);
+Task tTurnLeft(&turnLeft, 10, true, 3);
+Task tTurnRight(&turnLeft, 10, true, 3);
 
-Task tTurnLeftLast(10, 1,&turnLeft, &runner);
-Task tTurnRightLast(10, 1,&turnRight, &runner);
-Task tTurnStop(10, 1,&turnStop, &runner);
+Task tAllStop(&allStop, 10, true, 7);
 
-Task tPrepareKick(10, 1,&prepareKick, &runner);
-Task tKick(10, 1,&kick, &runner);
+Task tPrepareKick(&prepareKick, 10, true, 4);
+Task tKick(&kick, 10, true, 4);
 
-Task tPumpActuateIn(10, 1,&pumpActuateIn, &runner);
-Task tPumpActuateOut(10, 1,&pumpActuateOut, &runner);
-Task tPumpStop(10, 1,&pumpActuateStop, &runner);
+Task tPumpActuateIn(&pumpActuateInCB, 10, true, 4);
+Task tPumpActuateOut(&pumpActuateOutCB, 10, true, 4);
+Task tPumpActuateStop(&pumpActuateStopCB, 10, true, 4);
 
 int status = WL_IDLE_STATUS;
 
@@ -54,6 +51,8 @@ int turnLate;
 int collectorOnQ;
 int shootKickerAtEnd;
 int gameState = 0;
+
+bool motorBusy = false;
 
 unsigned long currentTime = millis();
 
@@ -92,93 +91,64 @@ void setup() {
   wifiInitialization(listeningPort, status, ssid, pass);
 
   // Main checking packages task
-  runner.init();
-
-  // runner.addTask(tNetworkCheck);
-  // runner.addTask(tGameChecker);
-  //
-  // tGameChecker.setSchedulingOption(TASK_SCHEDULE);
-  // tNetworkCheck.setSchedulingOption(TASK_SCHEDULE);
-
-  runner.addTask(tTurnLeftFirst);
-  runner.addTask(tTurnRightFirst);
-
-  runner.addTask(tDriveForward);
-  runner.addTask(tDriveBackward);
-  runner.addTask(tDriveFlankLeftFor);
-  runner.addTask(tDriveFlankLeftBac);
-  runner.addTask(tDriveFlankRightFor);
-  runner.addTask(tDriveFlankRightBac);
-  runner.addTask(tDriveStop);
-
-  runner.addTask(tTurnLeftLast);
-  runner.addTask(tTurnRightLast);
-  runner.addTask(tTurnStop);
-
-  runner.addTask(tPrepareKick);
-  runner.addTask(tKick);
-
-  runner.addTask(tPumpActuateIn);
-  runner.addTask(tPumpActuateOut);
-  runner.addTask(tPumpStop);
-
-  // tNetworkCheck.enable();
-  // tGameChecker.enable();
+  runner.addTask(&tCheckNetwork);
+  runner.addTask(&tGameStatus);
 }
 
 void loop() {
-  networkCheck();
-  gameStatus();
-  runner.execute();
+  currentTime = millis();
+  // networkCheck();
+  // gameStatus();
+  runner.run();
 }
 
 void gameStatus() {
   Serial.println("Game status checking");
   if (gameState == 3) {
-    runner.disableAll();
+    tAllStop.run(currentTime);
     globalSpeedModSet(255);
-    tDriveStop.enable();
+    Serial.println("Game status: Game stopped");
     return;
   }
-  Serial.println("Game state checked");
+  Serial.println("Game status: Game going!");
+  if (motorBusy == false) {
+    if (turnInitial != 0) {
+      Serial.println("Turn found!");
 
-  if (turnInitial) {
-    Serial.println("Turn found!");
-    if (!tDriveStop.isEnabled() and !tTurnStop.isEnabled()) {
-      Serial.println("No other movement tasks found");
-      if (turnInitial > 0) {
-        tTurnRightFirst.enable();
-        Serial.println("Turning 1");
-      } else {
-        tTurnLeftFirst.enable();
-        Serial.println("Turning 2");
-      }
-      tTurnStop.enableDelayed(turnInitial/(TURN_SPEED/1000));
-      Serial.println("I might be the problem");
-      //tTurnStop.enableDelayed(turnInitial/(TURN_SPEED/1000));
-      //Serial.println("No other movement tasks found");
+        Serial.println("No other movement tasks found");
+        if (turnInitial > 0) {
+
+          Serial.println("Turning 1");
+        } else {
+
+          Serial.println("Turning 2");
+        }
+
+        Serial.println("I might be the problem");
+        //tTurnStop.enableDelayed(turnInitial/(TURN_SPEED/1000));
+        //Serial.println("No other movement tasks found");
     }
-  }
 
-  if (goDistance) {
-    if (!tDriveStop.isEnabled() and !tTurnStop.isEnabled()) {
-      if (goDistance > 0) {
-        tDriveForward.enable();
-      } else {
-        tDriveBackward.enable();
+    if (goDistance) {
+      if () {
+        if (goDistance > 0) {
+
+        } else {
+
+        }
+
       }
-      tDriveStop.enableDelayed(goDistance/(ACTUAL_SPEED/1000));
     }
-  }
 
-  if (turnLate) {
-    if (!tDriveStop.isEnabled() and !tTurnStop.isEnabled()) {
-      if (turnInitial > 0) {
-        tTurnRightLast.enable();
-      } else {
-        tTurnLeftLast.enable();
+    if (turnLate) {
+      if () {
+        if (turnInitial > 0) {
+
+        } else {
+
+        }
+
       }
-      tTurnStop.enableDelayed(turnInitial/(TURN_SPEED/1000));
     }
   }
 }

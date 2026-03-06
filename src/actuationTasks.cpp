@@ -44,7 +44,7 @@ void driveFlankLeftBac() {
     motorRun(5, 255/globalSpeedMod);
 }
 
-void driveStop() {
+void allStop() {
     motorStop();
     Serial.println("Stoping");
 }
@@ -56,11 +56,6 @@ void turnRight() {
 void turnLeft() {
     motorTurn(-1);
     Serial.println("Turning Left");
-}
-
-void turnStop() {
-    motorStop();
-    Serial.println("Not turning ig... fine by me");
 }
 
 void kick() {

@@ -11,14 +11,18 @@ void driveFlankLeftFor();
 void driveFlankLeftBac();
 void driveFlankRightBac();
 void driveFlankRightFor();
-void driveStop();
 
 void turnLeft();
 void turnRight();
-void turnStop();
+
+void allStop();
 
 void prepareKick();
 void kick();
+
+void pumpActuateInCB();
+void pumpActuateOutCB();
+void pumpActuateStopCB();
 
 void globalSpeedModSet(int);
 
