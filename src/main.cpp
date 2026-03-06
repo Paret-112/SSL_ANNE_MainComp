@@ -53,6 +53,7 @@ int shootKickerAtEnd;
 int gameState = 0;
 
 bool motorBusy = false;
+int robotState = 0;
 
 unsigned long currentTime = millis();
 
@@ -102,6 +103,16 @@ void loop() {
   runner.run();
 }
 
+void runStatus() {
+  if (motorBusy == false) {
+    if (turnInitial != 0 and robotState == 0) {
+      if (turnInitial < 0) {
+
+      }
+    }
+  }
+}
+
 void gameStatus() {
   Serial.println("Game status checking");
   if (gameState == 3) {
@@ -111,46 +122,7 @@ void gameStatus() {
     return;
   }
   Serial.println("Game status: Game going!");
-  if (motorBusy == false) {
-    if (turnInitial != 0) {
-      Serial.println("Turn found!");
 
-        Serial.println("No other movement tasks found");
-        if (turnInitial > 0) {
-
-          Serial.println("Turning 1");
-        } else {
-
-          Serial.println("Turning 2");
-        }
-
-        Serial.println("I might be the problem");
-        //tTurnStop.enableDelayed(turnInitial/(TURN_SPEED/1000));
-        //Serial.println("No other movement tasks found");
-    }
-
-    if (goDistance) {
-      if () {
-        if (goDistance > 0) {
-
-        } else {
-
-        }
-
-      }
-    }
-
-    if (turnLate) {
-      if () {
-        if (turnInitial > 0) {
-
-        } else {
-
-        }
-
-      }
-    }
-  }
 }
 
 void networkCheck() {
