@@ -1,7 +1,5 @@
 #include <Arduino.h>
 
-#define _TASK_SCHEDULING_OPTIONS
-
 #include <WiFi.h>
 #include "LightTaskScheduler.h"
 
@@ -14,21 +12,17 @@
 
 void gameStatus();
 void networkCheck();
+void runStatus();
+void motorReset();
+
+void resetCall(int, int);
 
 TaskScheduler runner;
 
 Task tCheckNetwork(&networkCheck, 100, false, 7);
 Task tGameStatus(&gameStatus, 200, false, 6);
-
-Task tDriveForward(&driveForward, 10, true, 3);
-Task tDriveBackward(&driveBackward, 10, true, 3);
-Task tDriveFlankLeftFor(&driveFlankLeftFor, 10, true, 3);
-Task tDriveFlankLeftBac(&driveFlankLeftBac, 10, true, 3);
-Task tDriveFlankRightBac(&driveFlankRightBac, 10, true, 3);
-Task tDriveFlankRightFor(&driveFlankRightFor, 10, true, 3);
-
-Task tTurnLeft(&turnLeft, 10, true, 3);
-Task tTurnRight(&turnLeft, 10, true, 3);
+Task tRobotStatus(&runStatus, 50, false, 6);
+Task tMotorReset(&motorReset, 100, true, 6);
 
 Task tAllStop(&allStop, 10, true, 7);
 
@@ -43,17 +37,8 @@ int status = WL_IDLE_STATUS;
 
 u_int8_t packetBuffer[256]; //buffer to hold incoming packet
 
-int lastPacketID = 0;
-
-int turnInitial;
-int goDistance;
-int turnLate;
-int collectorOnQ;
-int shootKickerAtEnd;
-int gameState = 0;
-
 bool motorBusy = false;
-int robotState = 0;
+int robotState = 4;
 
 unsigned long currentTime = millis();
 
@@ -95,46 +80,136 @@ void setup() {
   // Main checking packages task
   runner.addTask(&tCheckNetwork);
   runner.addTask(&tGameStatus);
+
+  runner.addTask(&tRobotStatus);
+
+  runner.addTask(&tAllStop);
+  runner.addTask(&tMotorReset);
 }
 
 void loop() {
   currentTime = millis();
-  // networkCheck();
-  // gameStatus();
   runner.run();
 }
 
 void runStatus() {
-  if (motorBusy == false) {
-    if (turnInitial != 0 and robotState == 0) {
-      if (turnInitial < 0) {
-
-      }
+  Serial.println("runStatus checking");
+  Serial.print("motor Status: ");
+  Serial.println(motorBusy);
+  Serial.print("task line status: ");
+  Serial.println(robotState);
+  if (robotState == 4) return;
+  if (currentPacket.angle1 == 0 and !motorBusy) robotState = 1;
+  else {
+    motorBusy = true;
+    robotState = 1;
+    if (currentPacket.angle1 < 0) {
+      turnRight();
     }
+    else {
+      turnLeft();
+    }
+    Serial.println("runStatus: turning!");
+    resetCall(TURN_SPEED, currentPacket.angle1);
   }
+
+  if (currentPacket.distance == 0 and robotState == 1 and !motorBusy) robotState = 2;
+  else {
+    motorBusy = true;
+    robotState = 2;
+    if (currentPacket.distance < 0) {
+      driveForward();
+    }
+    else {
+      driveBackward();
+    }
+    resetCall(ACTUAL_SPEED, currentPacket.distance);
+    Serial.println("runStatus: moving!");
+  }
+
+  if (currentPacket.angle2 == 0 and robotState == 2 and !motorBusy) robotState = 3;
+  else {
+    motorBusy = true;
+    robotState = 3;
+    if (currentPacket.angle2 < 0) {
+      turnRight();
+    }
+    else {
+      turnLeft();
+    }
+    resetCall(TURN_SPEED, currentPacket.angle2);
+    Serial.println("runStatus: turning2!");
+  }
+  if (currentPacket.collectorOnQ != 0) {
+    pumpActuateInCB();
+  }
+  if (currentPacket.collectorOnQ == 0 and robotState != 1) {
+    pumpActuateStop();
+  }
+  if (currentPacket.shootKickerAtEnd == 1 and robotState == 3) {
+    kick();
+    robotState = 4;
+  }
+  if (currentPacket.shootKickerAtEnd != 1 and robotState == 3) {
+    robotState = 4;
+  }
+
 }
 
 void gameStatus() {
   Serial.println("Game status checking");
-  if (gameState == 3) {
+  // Serial.println(currentPacket.packetID);
+  // Serial.println(packet.packetID);
+  if (currentPacket.gameState == 7) {
+    driveForward();
+    delay(3000);
+    allStop();
+    turnRight();
+    delay(3000);
+    allStop();
+    turnLeft();
+    delay(6000);
+    allStop();
+    driveBackward();
+    delay(3000);
+    allStop();
+  }
+
+  if (currentPacket.gameState == 3) {
     tAllStop.run(currentTime);
     globalSpeedModSet(255);
     Serial.println("Game status: Game stopped");
     return;
   }
   Serial.println("Game status: Game going!");
-
 }
 
 void networkCheck() {
   Serial.println("Network check");
   currentTime = millis();
   // if there's data available, read a packet
-  checkPackets(packetBuffer, currentTime, lastPacketID);
+  checkPackets(packetBuffer, currentTime);
   memcpy(&packet, packetBuffer, sizeof(packet));
-  if (packet.robot_id == ROBOTID and packet.packetID != currentPacket.packetID and robotState == 4) {
+  if (packet.robot_id == ROBOTID and packet.packetID != currentPacket.packetID) {
+    Serial.println("New packet!");
     memcpy(&currentPacket, &packet, sizeof(packet));
     robotState = 0;
   }
+}
 
+void resetCall(int speed, int type) {
+  tAllStop.reset(currentTime);
+  tAllStop.setInterval(1000 * type/speed);
+  tAllStop.resume();
+  tMotorReset.reset(currentTime);
+  tMotorReset.setInterval(1000 * (25 + type)/speed);
+  tMotorReset.resume();
+  Serial.println("resetCall: scheduled!");
+}
+
+void motorReset() {
+  motorBusy = false;
+  Serial.println("motorReset concluded");
+  tAllStop.pause();
+  tMotorReset.pause();
 }

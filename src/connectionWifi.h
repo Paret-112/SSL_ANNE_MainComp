@@ -25,7 +25,7 @@ struct __attribute__((packed)) CommandPacket {
 
 void printWifiStatus();
 void wifiInitialization(unsigned int, int, char[], char[]);
-int checkPackets(u_int8_t[], unsigned long, int);
+int checkPackets(u_int8_t[], unsigned long);
 
 
 #endif //SSL_ANNE_MAIN_CONNECTIONWIFI_H

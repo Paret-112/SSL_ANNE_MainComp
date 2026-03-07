@@ -12,36 +12,36 @@
 #include "projectSettings.h"
 
 int turnDirection;
-int globalSpeedMod = 1;
+int globalSpeedMod = 52;
 
 void globalSpeedModSet(int set) {
     globalSpeedMod = set;
 }
 
 void driveForward() {
-    motorRun(0, 255/globalSpeedMod);
+    motorRun(0, 255 - globalSpeedMod);
     Serial.println("Forward!!");
 }
 
 void driveBackward() {
-    motorRun(1, 255/globalSpeedMod);
+    motorRun(1, 255 - globalSpeedMod);
     Serial.println("BACK, BACK!!!");
 }
 
 void driveFlankRightFor() {
-    motorRun(2, 255/globalSpeedMod);
+    motorRun(2, 255 - globalSpeedMod);
 }
 
 void driveFlankRightBac() {
-    motorRun(3, 255/globalSpeedMod);
+    motorRun(3, 255 - globalSpeedMod);
 }
 
 void driveFlankLeftFor() {
-    motorRun(4, 255/globalSpeedMod);
+    motorRun(4, 255 - globalSpeedMod);
 }
 
 void driveFlankLeftBac() {
-    motorRun(5, 255/globalSpeedMod);
+    motorRun(5, 255 - globalSpeedMod);
 }
 
 void allStop() {
@@ -60,10 +60,23 @@ void turnLeft() {
 
 void kick() {
     motorKick();
+    pumpActuateOut();
+    delay(100);
+    pumpActuateStop();
     Serial.println("SCOOOOOORRREEEE!!");
 }
 
 void prepareKick() {
     motorKickPrepare();
     Serial.println("And he readies his foot!");
+}
+
+void pumpActuateInCB() {
+    pumpActuateIn();
+}
+void pumpActuateOutCB() {
+    pumpActuateOut();
+}
+void pumpActuateStopCB() {
+    pumpActuateStop();
 }

@@ -18,6 +18,11 @@ void motorStop() {
     digitalWrite(PIN_MOTDR_R2_FOR, LOW);
     digitalWrite(PIN_MOTDR_L1_FOR, LOW);
     digitalWrite(PIN_MOTDR_L2_FOR, LOW);
+
+    digitalWrite(PIN_MOTDR_R1_BAC, LOW);
+    digitalWrite(PIN_MOTDR_R2_BAC, LOW);
+    digitalWrite(PIN_MOTDR_L1_BAC, LOW);
+    digitalWrite(PIN_MOTDR_L2_BAC, LOW);
 }
 
 void motorRun(int direction, unsigned int speed) {
