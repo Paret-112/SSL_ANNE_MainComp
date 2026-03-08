@@ -12,7 +12,7 @@
 #include "projectSettings.h"
 
 int turnDirection;
-int globalSpeedMod = 52;
+int globalSpeedMod = 1;
 
 void globalSpeedModSet(int set) {
     globalSpeedMod = set;

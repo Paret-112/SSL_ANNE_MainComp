@@ -161,18 +161,23 @@ void gameStatus() {
   // Serial.println(currentPacket.packetID);
   // Serial.println(packet.packetID);
   if (currentPacket.gameState == 7) {
-    driveForward();
-    delay(3000);
-    allStop();
-    turnRight();
-    delay(3000);
-    allStop();
-    turnLeft();
-    delay(6000);
-    allStop();
-    driveBackward();
-    delay(3000);
-    allStop();
+    prepareKick();
+    pumpActuateIn();
+    // driveForward();
+    // delay(3000);
+    // allStop();
+    // turnRight();
+    // delay(3000);
+    // allStop();
+    // turnLeft();
+    // delay(6000);
+    // allStop();
+    // driveBackward();
+    // delay(3000);
+    // allStop();
+    delay(10000);
+    pumpActuateStop();
+    pumpActuateOut();
   }
 
   if (currentPacket.gameState == 3) {
