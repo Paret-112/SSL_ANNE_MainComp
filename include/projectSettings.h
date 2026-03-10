@@ -11,12 +11,25 @@
 #define TESTPASS "Insurance"
 #define LOCALPORT 1234
 
+#define CLIENT_PORT 50123
+
 #define ROBOTID 7
 
 #define SERIAL_BAUD 115200
 
 #define TURN_SPEED 100
 #define ACTUAL_SPEED 100
+
+// #define _CLIENT_MODE
+// #define _UDP_MODE
+#define _MQTT_MODE
+
+#ifdef _MQTT_MODE
+#define MQTT_SERVER "0.0.0.0"
+#define MQTT_PORT 1883
+#define MQTT_ROBOTREAD "robotAnne/Read"
+#define MQTT_ROBOTWRITE "robotAnne/Write"
+#endif
 
 
 /***

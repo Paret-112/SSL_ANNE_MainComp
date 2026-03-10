@@ -12,7 +12,7 @@
 #include "projectSettings.h"
 
 int turnDirection;
-int globalSpeedMod = 1;
+int globalSpeedMod = 0;
 
 void globalSpeedModSet(int set) {
     globalSpeedMod = set;
@@ -50,11 +50,11 @@ void allStop() {
 }
 
 void turnRight() {
-    motorTurn(1);
+    motorTurn(1, 128 - globalSpeedMod);
     Serial.println("Turning Right");
 }
 void turnLeft() {
-    motorTurn(-1);
+    motorTurn(-1, 128 - globalSpeedMod);
     Serial.println("Turning Left");
 }
 
