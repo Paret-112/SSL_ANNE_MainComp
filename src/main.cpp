@@ -20,18 +20,6 @@ void resetCall(int, int);
 TaskScheduler runner;
 
 Task tCheckNetwork(&networkCheck, 100, false, 7);
-// Task tGameStatus(&gameStatus, 200, false, 6);
-// Task tRobotStatus(&runStatus, 50, false, 6);
-// Task tMotorReset(&motorReset, 100, true, 6);
-
-// Task tAllStop(&allStop, 10, true, 7);
-//
-// Task tPrepareKick(&prepareKick, 10, true, 4);
-// Task tKick(&kick, 10, true, 4);
-//
-// Task tPumpActuateIn(&pumpActuateInCB, 10, true, 4);
-// Task tPumpActuateOut(&pumpActuateOutCB, 10, true, 4);
-// Task tPumpActuateStop(&pumpActuateStopCB, 10, true, 4);
 
 int status = WL_IDLE_STATUS;
 
@@ -81,12 +69,6 @@ void setup() {
 
   // Main checking packages task
   runner.addTask(&tCheckNetwork);
-  // runner.addTask(&tGameStatus);
-  //
-  // runner.addTask(&tRobotStatus);
-  //
-  // runner.addTask(&tAllStop);
-  // runner.addTask(&tMotorReset);
 }
 
 void loop() {
