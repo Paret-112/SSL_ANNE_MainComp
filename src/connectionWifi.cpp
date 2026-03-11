@@ -8,19 +8,14 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
-#include "MqttClient.h"
-
-#ifdef _UDP_MODE
-#include <WiFiUdp.h>
-#endif
-
 #ifdef _MQTT_MODE
-#include <ArduinoMqttClient.h>
+#include <MqttClient.h>
 #endif
 
 #include "actuationTasks.h"
 
 #ifdef _UDP_MODE
+#include <WiFiUdp.h>
 WiFiUDP Udp;
 #endif
 
@@ -38,7 +33,6 @@ int port = MQTT_PORT;
 const char robotReadTopic[] = MQTT_ROBOTREAD;
 const char robotWriteTopic[] = MQTT_ROBOTWRITE;
 #endif
-
 
 String numericPart = "";
 char codeReceived;
@@ -140,13 +134,7 @@ void checkPackets() {
             }
         }
     }
-    switch (codeReceived) {
-        case 'F': driveForward(); break;
-        case 'L': turnLeft(); break;
-        case 'B': driveBackward(); break;
-        case 'R': turnRight(); break;
-        case 'S': allStop(); break;
-    }
+    interpreter(codeReceived, numericPart);
 }
 #endif
 
@@ -225,18 +213,28 @@ void checkPackets() {
 
 void mqttClientPoll(int messageSize) {
     Serial.println("Received a message with topic '");
-    Serial.print(mqttClient.messageTopic());
+    String line = mqttClient.messageTopic();
     Serial.print("', length ");
     Serial.print(messageSize);
     Serial.println(" bytes:");
 
+    numericPart = "";
+    for (int i = 0; i < line.length(); i++) {
+        int character = line[i];
+        if (isDigit(character)) {
+            numericPart += (char) character;
+        } else if (character != '\n') {
+            codeReceived = character;
+        } else {
+            break;
+        }
+    }
+    interpreter(codeReceived, numericPart);
     // use the Stream interface to print the contents
     while (mqttClient.available()) {
         Serial.print(static_cast<char>(mqttClient.read()));
         mqttClientPublish();
     }
-    Serial.println();
-    Serial.println();
 }
 
 void mqttClientPublish() {
@@ -245,3 +243,21 @@ void mqttClientPublish() {
     mqttClient.endMessage();
 }
 #endif
+
+void interpreter(char instructionFactor, String numberFactor) {
+    switch (instructionFactor) {
+        case 'F': driveForward(); break;
+        case 'L': turnLeft(); break;
+        case 'B': driveBackward(); break;
+        case 'R': turnRight(); break;
+        case 'S': allStop(); break;
+        case 'I': pumpActuateInCB(); break;
+        case 'O': pumpActuateOutCB(); break;
+        case 'J':
+            if (numberFactor != "") {
+                globalSpeedModSet(numberFactor.toInt());
+            }
+            break;
+        default: allStop(); break;
+    }
+}

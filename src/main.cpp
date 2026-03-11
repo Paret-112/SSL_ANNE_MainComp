@@ -1,6 +1,8 @@
 #include <Arduino.h>
 
 #include <WiFi.h>
+
+#include "actuationTasks.h"
 #include "LightTaskScheduler.h"
 
 #include "pinOut.h" // Check and change before use!
@@ -9,10 +11,7 @@
 #include "connectionWifi.h" // Wifi connection module
 #include "motorDrivers.h" // Motor drivers and tests
 
-void gameStatus();
 void networkCheck();
-void runStatus();
-void motorReset();
 
 void resetCall(int, int);
 
@@ -63,6 +62,14 @@ void setup() {
   pinMode(PIN_MOTKICK_SPD, OUTPUT);
   pinMode(PIN_MOTKICK_FOR, OUTPUT);
   pinMode(PIN_MOTKICK_BAC, OUTPUT);
+
+  pinMode(PIN_LED_BLUE, OUTPUT);
+  pinMode(PIN_LED_GREEN, OUTPUT);
+  pinMode(PIN_LED_RED, OUTPUT);
+
+  pinMode(PIN_VOLTAGE, INPUT);
+
+  prepareKick();
 
   wifiInitialization(listeningPort, status, ssid, pass);
 

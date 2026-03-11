@@ -5,13 +5,9 @@
 #include "motorDrivers.h" // Motor drivers
 
 #include "actuationTasks.h"
-#include "connectionWifi.h"
 
 #include <Arduino.h>
 
-#include "projectSettings.h"
-
-int turnDirection;
 int globalSpeedMod = 0;
 
 void globalSpeedModSet(int set) {

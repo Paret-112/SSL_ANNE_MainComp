@@ -31,4 +31,8 @@
 
 #define PIN_VOLTAGE A0 // Temp, if we want to make one for inputs too
 
+#define PIN_LED_RED 86
+#define PIN_LED_GREEN 87
+#define PIN_LED_BLUE 88
+
 #endif //SSL_ANNE_MAIN_PINOUT_H
