@@ -32,30 +32,40 @@
 #endif
 
 
-/***
- *  gameState 7 is the test state for configuring motor directions and other factors.
+/*** Welcome to this hole of a repo, introducing the team and some quotes.
  *
- *  To run upload code onto Arduino Giga R1 Wi-fi
- *  using the nrg-Vision send command with gameState and other directives.
+ *  To run upload code onto Arduino Giga R1 Wi-Fi, define the mode in which
+ *  instructions will be given, and pray to any god you know of.
  *
- *  This whole thing is a mess in a beautiful way and I have no idea how we fare
- *  Next time I'm doing something like this, I'll start way earlier than two months
- *  - Kristjan
  *
- *  Project Lead/Manager:
+ *  Project lead/manager:
  *  Andre Nurkma
  *
- *  Code Authors:
- *  Kristjan-Peeter Ivask (Paret-112)
- *  Mattias Mäits (MattNRG)
+ *  Project socialmedia Gal
+ *  Anita
  *
- *  Engineers:
+ *  Code team:
+ *  Mattias Mäits (MattNRG)
+ *  Kristjan-Peeter Ivask (Paret-112)
+ *  Aleksandr Hmelnitski
+ *
+ *  Assembly team:
  *  Siim Neštšadim
  *  Mathias Järveoja
  *
+ *  Team N.R.G mentor:
+ *  Kenari Koorik
  *
  *  # Notes for next time!!
  *  Double batteris, one for logic and second for motors
+ *
+ *  This whole thing is a mess in a beautiful way and I have no idea how we fare
+ *  Next time I'm doing something like this, I'll start way earlier than a month.
+ *  - Kristjan
+ *
+ *  We had 1 month to design it, 1 month to build it, and one month to debug it.
+ *  And that month was February.
+ *  - Probably Siim
  *
  *
 ***/
