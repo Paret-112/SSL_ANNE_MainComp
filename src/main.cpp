@@ -3,7 +3,6 @@
 #include <WiFi.h>
 #include "LightTaskScheduler.h"
 
-#include "actuationTasks.h"
 #include "pinOut.h" // Check and change before use!
 #include "projectSettings.h" // Shh, secrets live here, make a new one or replace secrets in code for local tests
 
@@ -19,7 +18,7 @@ void resetCall(int, int);
 
 TaskScheduler runner;
 
-Task tCheckNetwork(&networkCheck, 100, false, 7);
+Task tCheckNetwork(&networkCheck, 10, false, 7);
 
 int status = WL_IDLE_STATUS;
 

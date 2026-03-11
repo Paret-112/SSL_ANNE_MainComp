@@ -25,7 +25,7 @@
 #define _MQTT_MODE
 
 #ifdef _MQTT_MODE
-#define MQTT_SERVER "0.0.0.0"
+#define MQTT_SERVER "192.168.143.222"
 #define MQTT_PORT 1883
 #define MQTT_ROBOTREAD "robotAnne/Read"
 #define MQTT_ROBOTWRITE "robotAnne/Write"

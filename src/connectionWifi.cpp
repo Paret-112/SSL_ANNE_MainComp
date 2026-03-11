@@ -221,7 +221,6 @@ int checkPackets(uint8_t packetBuffer[], unsigned long systemTime) {
 #ifdef _MQTT_MODE
 void checkPackets() {
     mqttClient.poll();
-
 }
 
 void mqttClientPoll(int messageSize) {
@@ -234,8 +233,15 @@ void mqttClientPoll(int messageSize) {
     // use the Stream interface to print the contents
     while (mqttClient.available()) {
         Serial.print(static_cast<char>(mqttClient.read()));
+        mqttClientPublish();
     }
     Serial.println();
     Serial.println();
+}
+
+void mqttClientPublish() {
+    mqttClient.beginMessage(robotWriteTopic);
+    mqttClient.print(millis());
+    mqttClient.endMessage();
 }
 #endif
