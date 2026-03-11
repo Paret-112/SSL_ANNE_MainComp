@@ -3,15 +3,39 @@
 //
 
 #include "connectionWifi.h"
-#include "pinOut.h"
+#include "projectSettings.h"
 
 #include <Arduino.h>
 #include <WiFi.h>
+
+#ifdef _MQTT_MODE
+#include <MqttClient.h>
+#endif
+
+#include "actuationTasks.h"
+
+#ifdef _UDP_MODE
 #include <WiFiUdp.h>
-
-#include "projectSettings.h"
-
 WiFiUDP Udp;
+#endif
+
+#ifdef _CLIENT_MODE
+WiFiClient client;
+IPAddress clientIP = IPAddress(192, 168, 143, 168);
+#endif
+
+#ifdef _MQTT_MODE
+WiFiClient client;
+MqttClient mqttClient(client);
+
+const char broker[] = MQTT_SERVER;
+int port = MQTT_PORT;
+const char robotReadTopic[] = MQTT_ROBOTREAD;
+const char robotWriteTopic[] = MQTT_ROBOTWRITE;
+#endif
+
+String numericPart = "";
+char codeReceived;
 
 void printWifiStatus() {
     // print the SSID of the network you're attached to:
@@ -55,11 +79,67 @@ void wifiInitialization(const unsigned int localPort, int status, char ssid[], c
 
     Serial.println("\nStarting connection to server...");
     // if you get a connection, report back via serial:
+
+#ifdef _MQTT_MODE
+    if (!mqttClient.connect(broker, port)) {
+        Serial.print("MQTT connection failed! Error code = ");
+        Serial.println(mqttClient.connectError());
+
+        while (1);
+    }
+
+    mqttClient.onMessage(mqttClientPoll);
+
+    mqttClient.subscribe(robotReadTopic);
+#endif
+
+#ifdef _UDP_MODE
     Udp.begin(localPort);
+#endif
+
+#ifdef _CLIENT_MODE
+    connectClient();
+#endif
     Serial.println("\nWeee!");
 }
 
-int checkPackets(uint8_t packetBuffer[], unsigned long systemTime, int packetID) {
+#ifdef _CLIENT_MODE
+void connectClient() {
+    if (!client.connect(clientIP, CLIENT_PORT)) {
+        Serial.println("Connection to host failed");
+        delay(1000);
+        return;
+    }
+    Serial.print("Connected");
+}
+
+void checkPackets() {
+    if (!client.connected() > 0) {
+        connectClient();
+    }
+
+    while (client.available() > 0) {
+        String line = client.readStringUntil('\n');
+        Serial.print("code received: ");
+        Serial.println(line);
+        numericPart = "";
+        for (int i = 0; i < line.length(); i++) {
+            int character = line[i];
+            if (isDigit(character)) {
+                numericPart += (char) character;
+            } else if (character != '\n') {
+                codeReceived = character;
+            } else {
+                break;
+            }
+        }
+    }
+    interpreter(codeReceived, numericPart);
+}
+#endif
+
+#ifdef _UDP_MODE
+int checkPackets(uint8_t packetBuffer[], unsigned long systemTime) {
     int packetSize = Udp.parsePacket();
     // Serial.print("Checked for packet at: ");
     // Serial.println(systemTime);
@@ -123,4 +203,61 @@ int checkPackets(uint8_t packetBuffer[], unsigned long systemTime, int packetID)
         return 1;
     }
     return 0;
+}
+#endif
+
+#ifdef _MQTT_MODE
+void checkPackets() {
+    mqttClient.poll();
+}
+
+void mqttClientPoll(int messageSize) {
+    Serial.println("Received a message with topic '");
+    String line = mqttClient.messageTopic();
+    Serial.print("', length ");
+    Serial.print(messageSize);
+    Serial.println(" bytes:");
+
+    numericPart = "";
+    for (int i = 0; i < line.length(); i++) {
+        int character = line[i];
+        if (isDigit(character)) {
+            numericPart += (char) character;
+        } else if (character != '\n') {
+            codeReceived = character;
+        } else {
+            break;
+        }
+    }
+    interpreter(codeReceived, numericPart);
+    // use the Stream interface to print the contents
+    while (mqttClient.available()) {
+        Serial.print(static_cast<char>(mqttClient.read()));
+        mqttClientPublish();
+    }
+}
+
+void mqttClientPublish() {
+    mqttClient.beginMessage(robotWriteTopic);
+    mqttClient.print(millis());
+    mqttClient.endMessage();
+}
+#endif
+
+void interpreter(char instructionFactor, String numberFactor) {
+    switch (instructionFactor) {
+        case 'F': driveForward(); break;
+        case 'L': turnLeft(); break;
+        case 'B': driveBackward(); break;
+        case 'R': turnRight(); break;
+        case 'S': allStop(); break;
+        case 'I': pumpActuateInCB(); break;
+        case 'O': pumpActuateOutCB(); break;
+        case 'J':
+            if (numberFactor != "") {
+                globalSpeedModSet(numberFactor.toInt());
+            }
+            break;
+        default: allStop(); break;
+    }
 }

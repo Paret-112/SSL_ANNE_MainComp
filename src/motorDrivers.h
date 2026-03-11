@@ -5,7 +5,7 @@
 #ifndef SSL_ANNE_MAIN_MOTORDRIVERS_H
 #define SSL_ANNE_MAIN_MOTORDRIVERS_H
 
-void motorTurn(int);
+void motorTurn(int, unsigned int);
 void motorStop();
 void motorRun(int, unsigned int);
 

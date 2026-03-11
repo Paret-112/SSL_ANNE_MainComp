@@ -11,21 +11,31 @@
 #define MSG_DISCOVER_REPLY 2
 #define MSG_COMMAND 3
 
+
+void printWifiStatus();
+void wifiInitialization(unsigned int, int, char[], char[]);
+
 struct __attribute__((packed)) CommandPacket {
     uint8_t msg_type;
     uint8_t robot_id;
     int angle1;
     int distance;
     int angle2;
-    bool collectorOnQ;
-    bool shootKickerAtEnd;
+    int collectorOnQ;
+    int shootKickerAtEnd;
     int gameState;
     int packetID;
 };
 
-void printWifiStatus();
-void wifiInitialization(unsigned int, int, char[], char[]);
-int checkPackets(u_int8_t[], unsigned long, int);
+int checkPackets(uint8_t, unsigned long);
+
+void checkPackets();
+void connectClient();
+
+void mqttClientPoll(int);
+void mqttClientPublish();
+
+void interpreter(char, String);
 
 
 #endif //SSL_ANNE_MAIN_CONNECTIONWIFI_H

@@ -13,10 +13,6 @@ void setupGyro()
 {
     Wire.begin();
     Wire.setClock(400000); //400khz clock
-    Serial.begin(115200);
-    while (!Serial) {
-        ;
-    }
 
     int err = IMU.init(calib, IMU_ADDRESS);
     if (err != 0) {

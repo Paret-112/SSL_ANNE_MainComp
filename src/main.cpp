@@ -1,54 +1,43 @@
 #include <Arduino.h>
 
 #include <WiFi.h>
-#include <TaskScheduler.h>
 
 #include "actuationTasks.h"
+#include "LightTaskScheduler.h"
+
 #include "pinOut.h" // Check and change before use!
 #include "projectSettings.h" // Shh, secrets live here, make a new one or replace secrets in code for local tests
 
 #include "connectionWifi.h" // Wifi connection module
 #include "motorDrivers.h" // Motor drivers and tests
 
-Task tDriveForward(0, 1,&driveForward);
-Task tDriveBackward(0, 1, &driveBackward);
-Task tDriveFlankLeftFor(0, 1, &driveFlankLeftFor);
-Task tDriveFlankLeftBac(0, 1, &driveFlankLeftBac);
-Task tDriveFlankRightBac(0, 1,&driveFlankRightBac);
-Task tDriveFlankRightFor(0, 1,&driveFlankRightFor);
-Task tDriveStop(0, 1,&driveStop);
+void networkCheck();
 
-Task tTurnLeft(0, 1,&turnLeft);
-Task tTurnRight(0, 1,&turnRight);
-Task tTurnStop(0, 1,&turnStop);
+void resetCall(int, int);
 
-Task tPrepareKick(0, 1,&prepareKick);
-Task tKick(0, 1,&kick);
+TaskScheduler runner;
 
-Task tPumpActuateIn(0, 1,&pumpActuateIn);
-Task tPumpActuateOut(0, 1,&pumpActuateOut);
-Task tPumpStop(0, 1,&pumpActuateStop);
+Task tCheckNetwork(&networkCheck, 10, false, 7);
 
 int status = WL_IDLE_STATUS;
+
+u_int8_t packetBuffer[256]; //buffer to hold incoming packet
+
+bool motorBusy = false;
+int robotState = 4;
+
+unsigned long currentTime = millis();
+
+#ifdef _UDP_MODE
+CommandPacket packet;
+CommandPacket currentPacket;
+#endif
 
 char ssid[] = TESTSSID;        // your network SSID (name)
 char pass[] = TESTPASS;    // your network password (use for WPA, or use as key for WEP)
 int keyIndex = 0;            // your network key index number (needed only for WEP)
 
 const unsigned int listeningPort = LOCALPORT;      // local port to listen on
-
-u_int8_t packetBuffer[256]; //buffer to hold incoming packet
-char  replyBuffer[] = "acknowledged";       // a string to send back
-char testPacket[256] = "motorTest";
-
-unsigned long previousTime = millis();
-unsigned long currentTime = millis();
-
-int lastPacketID = 0;
-
-Scheduler mainScheduler;
-
-CommandPacket packet;
 
 void setup() {
   // put your setup code here, to run once:
@@ -74,30 +63,39 @@ void setup() {
   pinMode(PIN_MOTKICK_FOR, OUTPUT);
   pinMode(PIN_MOTKICK_BAC, OUTPUT);
 
+  pinMode(PIN_LED_BLUE, OUTPUT);
+  pinMode(PIN_LED_GREEN, OUTPUT);
+  pinMode(PIN_LED_RED, OUTPUT);
+
+  pinMode(PIN_VOLTAGE, INPUT);
+
+  prepareKick();
+
   wifiInitialization(listeningPort, status, ssid, pass);
 
   // Main checking packages task
-  mainScheduler.init();
-
-
-
+  runner.addTask(&tCheckNetwork);
 }
 
 void loop() {
   currentTime = millis();
-  // if there's data available, read a packet
-  checkPackets(packetBuffer, currentTime, lastPacketID);
-  memcpy(&packet, packetBuffer, sizeof(packet));
-  if (packet.robot_id == ROBOTID) {
-    if (packet.packetID == lastPacketID) return;
-
-  }
-  // Set motor speed factor.
-  analogWrite(PIN_MOTDR_L1_SPD, 128);
-  analogWrite(PIN_MOTDR_L2_SPD, 128);
-  analogWrite(PIN_MOTDR_R1_SPD, 128);
-  analogWrite(PIN_MOTDR_R2_SPD, 128);
+  runner.run();
 }
 
 
+void networkCheck() {
+  Serial.println("Network check");
+  currentTime = millis();
+  // if there's data available, read a packet
+  checkPackets();
 
+#ifdef _UDP_MODE
+  memcpy(&packet, packetBuffer, sizeof(packet));
+  if (packet.robot_id == ROBOTID and packet.packetID != currentPacket.packetID) {
+    Serial.println("New packet!");
+    memcpy(&currentPacket, &packet, sizeof(packet));
+    robotState = 0;
+  }
+#endif
+
+}
