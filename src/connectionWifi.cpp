@@ -258,6 +258,5 @@ void interpreter(char instructionFactor, String numberFactor) {
                 globalSpeedModSet(numberFactor.toInt());
             }
             break;
-        default: allStop(); break;
     }
 }
