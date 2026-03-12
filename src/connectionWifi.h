@@ -33,9 +33,9 @@ void checkPackets();
 void connectClient();
 
 void mqttClientPoll(int);
-void mqttClientPublish();
+void mqttClientPublish(char);
 
-void interpreter(char, String);
+void interpreter(char);
 
 
 #endif //SSL_ANNE_MAIN_CONNECTIONWIFI_H

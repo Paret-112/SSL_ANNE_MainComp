@@ -69,9 +69,9 @@ void setup() {
 
   pinMode(PIN_VOLTAGE, INPUT);
 
-  prepareKick();
-
   wifiInitialization(listeningPort, status, ssid, pass);
+
+  mqttClientPublish('a');
 
   // Main checking packages task
   runner.addTask(&tCheckNetwork);
@@ -84,7 +84,6 @@ void loop() {
 
 
 void networkCheck() {
-  Serial.println("Network check");
   currentTime = millis();
   // if there's data available, read a packet
   checkPackets();

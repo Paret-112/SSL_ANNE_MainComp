@@ -13,6 +13,7 @@
 #endif
 
 #include "actuationTasks.h"
+#include "pinOut.h"
 
 #ifdef _UDP_MODE
 #include <WiFiUdp.h>
@@ -84,7 +85,7 @@ void wifiInitialization(const unsigned int localPort, int status, char ssid[], c
     if (!mqttClient.connect(broker, port)) {
         Serial.print("MQTT connection failed! Error code = ");
         Serial.println(mqttClient.connectError());
-
+        digitalWrite(PIN_LED_RED, HIGH);
         while (1);
     }
 
@@ -101,6 +102,7 @@ void wifiInitialization(const unsigned int localPort, int status, char ssid[], c
     connectClient();
 #endif
     Serial.println("\nWeee!");
+    digitalWrite(PIN_LED_GREEN, HIGH);
 }
 
 #ifdef _CLIENT_MODE
@@ -212,11 +214,9 @@ void checkPackets() {
 }
 
 void mqttClientPoll(int messageSize) {
-    Serial.println("Received a message with topic '");
     String line = mqttClient.messageTopic();
-    Serial.print("', length ");
     Serial.print(messageSize);
-    Serial.println(" bytes:");
+    Serial.println(" bytes recieved!");
 
     numericPart = "";
     for (int i = 0; i < line.length(); i++) {
@@ -229,22 +229,21 @@ void mqttClientPoll(int messageSize) {
             break;
         }
     }
-    interpreter(codeReceived, numericPart);
+    interpreter(static_cast<char>(mqttClient.read()));
     // use the Stream interface to print the contents
     while (mqttClient.available()) {
-        Serial.print(static_cast<char>(mqttClient.read()));
-        mqttClientPublish();
+        Serial.println(static_cast<char>(mqttClient.read()));
     }
 }
 
-void mqttClientPublish() {
+void mqttClientPublish(char packet) {
     mqttClient.beginMessage(robotWriteTopic);
-    mqttClient.print(millis());
+    mqttClient.print(packet);
     mqttClient.endMessage();
 }
 #endif
 
-void interpreter(char instructionFactor, String numberFactor) {
+void interpreter(char instructionFactor) {
     switch (instructionFactor) {
         case 'F': driveForward(); break;
         case 'L': turnLeft(); break;
@@ -253,10 +252,8 @@ void interpreter(char instructionFactor, String numberFactor) {
         case 'S': allStop(); break;
         case 'I': pumpActuateInCB(); break;
         case 'O': pumpActuateOutCB(); break;
-        case 'J':
-            if (numberFactor != "") {
-                globalSpeedModSet(numberFactor.toInt());
-            }
-            break;
+        case 'J': globalSpeedModSet(125); break;
+        case 'T': mqttClientPublish('+'); break;
+        default: allStop(); break;
     }
 }
